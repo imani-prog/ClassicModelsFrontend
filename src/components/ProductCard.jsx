@@ -5,7 +5,7 @@ const ProductCard = () => {
     return (
         <div className="w-90 mt-4 left-70 absolute justify-start mx-auto px-4 py-8">
             <div className='flex flex-col items-center p-3 rounded-xl bg-[#234566] justify-center mb-4'>
-                <h2 className='text-2xl font-bold text-white'>Good afternoon, Joy✨</h2>
+                <h2 className='text-2xl font-bold text-white'>Good afternoon, Tim✨</h2>
                 <p className='text-white'>Here is the latest on Product A</p>
                 <p className='text-white'>June 12, 2025</p>
             </div>

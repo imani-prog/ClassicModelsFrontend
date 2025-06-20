@@ -25,6 +25,10 @@ const Customers = () => {
         creditLimit: '',
         salesRepEmployeeNumber: ''
     });
+    const [searchNumber, setSearchNumber] = useState('');
+    const [searchResult, setSearchResult] = useState(null);
+    const [searchError, setSearchError] = useState('');
+    const [searchEditMode, setSearchEditMode] = useState(false);
 
     const fetchCustomers = () => {
         setLoading(true);
@@ -133,6 +137,57 @@ const Customers = () => {
             .finally(() => setSaving(false));
     };
 
+    const handleSearch = () => {
+        setSearchError('');
+        setSearchResult(null);
+        if (!searchNumber) return;
+        fetch(`http://localhost:8081/customers/${searchNumber}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Customer not found');
+                return res.json();
+            })
+            .then(data => {
+                setSearchResult(data);
+                setSearchEditMode(false);
+            })
+            .catch(err => {
+                setSearchError(err.message);
+            });
+    };
+
+    const handleSearchEditClick = () => {
+        setSearchEditMode(true);
+    };
+
+    const handleSearchInputChange = (e) => {
+        const { name, value } = e.target;
+        setSearchResult(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSearchSave = (e) => {
+        e.preventDefault();
+        fetch(`http://localhost:8081/customers/${searchResult.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...searchResult,
+                creditLimit: searchResult.creditLimit ? parseFloat(searchResult.creditLimit) : null,
+                salesRepEmployeeNumber: searchResult.salesRepEmployeeNumber ? { id: parseInt(searchResult.salesRepEmployeeNumber.id || searchResult.salesRepEmployeeNumber) } : null
+            })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to save changes');
+                return res.json();
+            })
+            .then(() => {
+                setSearchEditMode(false);
+                fetchCustomers();
+            })
+            .catch(err => {
+                alert(err.message);
+            });
+    };
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className='items-center justify-center w-full flex flex-col mb-6'>
@@ -181,17 +236,65 @@ const Customers = () => {
                 </div>
             )}
             <div className="flex items-center justify-between mb-4">
-                <div className="relative">
+                <div className="relative flex gap-2 items-center">
                     <input
                         type="text"
-                        placeholder="Search customers"
+                        placeholder="Search by customer number"
+                        value={searchNumber}
+                        onChange={e => setSearchNumber(e.target.value)}
                         className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-13 pr-4"
                     />
-                    <span className="absolute  left-3 top-2.5 ">
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                        onClick={handleSearch}
+                        type="button"
+                    >
+                        Search
+                    </button>
+                    <span className="absolute left-3 top-2.5">
                         <IoSearch className="w-5 h-5" />
                     </span>
                 </div>
             </div>
+            {searchError && <p className="text-red-500">{searchError}</p>}
+            {searchResult && (
+                <form onSubmit={handleSearchSave} className="relative bg-white border border-blue-300 rounded-lg p-6 mb-6 shadow-md flex flex-col gap-3 max-w-xl mx-auto">
+                    <button
+                        type="button"
+                        onClick={() => { setSearchResult(null); setSearchEditMode(false); setSearchError(''); }}
+                        className="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition-colors text-2xl"
+                        title="Close"
+                    >
+                        <IoMdClose />
+                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input name="customerName" value={searchResult.customerName || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="Customer Name" className="border p-2 rounded" />
+                        <input name="contactFirstName" value={searchResult.contactFirstName || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="Contact First Name" className="border p-2 rounded" />
+                        <input name="contactLastName" value={searchResult.contactLastName || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="Contact Last Name" className="border p-2 rounded" />
+                        <input name="phone" value={searchResult.phone || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="Phone" className="border p-2 rounded" />
+                        <input name="addressLine1" value={searchResult.addressLine1 || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="Address Line 1" className="border p-2 rounded" />
+                        <input name="addressLine2" value={searchResult.addressLine2 || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} placeholder="Address Line 2" className="border p-2 rounded" />
+                        <input name="city" value={searchResult.city || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="City" className="border p-2 rounded" />
+                        <input name="state" value={searchResult.state || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} placeholder="State" className="border p-2 rounded" />
+                        <input name="postalCode" value={searchResult.postalCode || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} placeholder="Postal Code" className="border p-2 rounded" />
+                        <input name="country" value={searchResult.country || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} required placeholder="Country" className="border p-2 rounded" />
+                        <input name="creditLimit" value={searchResult.creditLimit || ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} placeholder="Credit Limit" className="border p-2 rounded" type="number" min="0" step="0.01" />
+                        <input name="salesRepEmployeeNumber" value={searchResult.salesRepEmployeeNumber ? (searchResult.salesRepEmployeeNumber.id || searchResult.salesRepEmployeeNumber) : ''} onChange={searchEditMode ? handleSearchInputChange : undefined} disabled={!searchEditMode} placeholder="Sales Rep Employee Number" className="border p-2 rounded" type="number" min="0" />
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                        {!searchEditMode && (
+                            <button type="button" className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded" onClick={handleSearchEditClick}>
+                                Edit
+                            </button>
+                        )}
+                        {searchEditMode && (
+                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                                Save Changes
+                            </button>
+                        )}
+                    </div>
+                </form>
+            )}
             {loading ? (
                 <p>Loading...</p>
             ) : error ? (
