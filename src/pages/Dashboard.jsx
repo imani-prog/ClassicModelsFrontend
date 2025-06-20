@@ -55,7 +55,7 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                         </div>
                         <div className='w-full cursor-pointer items-center justify-center text-center'>
                             <button className='bg-[#4a90e2] mt-5 rounded-lg text-white py-2 px-8 '>
-                                View Customers
+                                View Orders
                             </button>
                         </div>
                     </div>

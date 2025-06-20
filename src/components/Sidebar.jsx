@@ -13,9 +13,9 @@ const Sidebar = () => {
     return (
         <div>
             <aside className="fixed top-0  left-0 w-60 h-full bg-[#1a2f43] text-white shadow-lg">
-                <div className="p-4">
+                {/* <div className="p-4">
                     <h1 className="text-xl text-[#4a90e2] font-bold">Product<span className='text-white'>Line</span> </h1>
-                </div>
+                </div> */}
                 <nav className="mt-4 w-full">
                     <ul className='space-y-4 '>
 
