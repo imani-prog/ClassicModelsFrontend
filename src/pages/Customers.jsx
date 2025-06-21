@@ -32,6 +32,25 @@ const Customers = () => {
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const toastTimeout = useRef(null);
     const [confirmDialog, setConfirmDialog] = useState({ show: false, customerId: null });
+    const [visibleColumnStart, setVisibleColumnStart] = useState(0);
+
+    const columns = [
+        { key: 'customerName', label: 'Customer Name' },
+        { key: 'id', label: 'Customer Number' },
+        { key: 'contactFirstName', label: 'Contact First Name' },
+        { key: 'contactLastName', label: 'Contact Last Name' },
+        { key: 'phone', label: 'Phone' },
+        { key: 'addressLine1', label: 'Address Line 1' },
+        { key: 'addressLine2', label: 'Address Line 2' },
+        { key: 'city', label: 'City' },
+        { key: 'state', label: 'State' },
+        { key: 'country', label: 'Country' },
+        { key: 'postalCode', label: 'Postal Code' },
+        { key: 'creditLimit', label: 'Credit Limit' },
+        { key: 'salesRepEmployeeNumber', label: 'Sales Rep Employee Number' }
+    ];
+    const columnsPerView = 13;
+    const maxStart = columns.length - columnsPerView;
 
     const fetchCustomers = () => {
         setLoading(true);
@@ -208,6 +227,14 @@ const Customers = () => {
             });
     };
 
+    const handleScrollLeft = () => {
+        setVisibleColumnStart((prev) => Math.max(0, prev - columnsPerView));
+    };
+
+    const handleScrollRight = () => {
+        setVisibleColumnStart((prev) => Math.min(maxStart, prev + columnsPerView));
+    };
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className='items-center justify-center w-full flex flex-col mb-6'>
@@ -320,59 +347,51 @@ const Customers = () => {
             ) : error ? (
                 <p className="text-red-500">{error}</p>
             ) : (
-                <table className="w-full border overflow-x-scroll border-blue-300">
-                    <thead className="bg-[#f5f5f5] border-b-2 border-[#258cbf]">
-                        <tr>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Customer Name</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Customer Number</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Contact First Name</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Contact Last Name</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Phone</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Address Line 1</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Address Line 2</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">City</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">State</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Country</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Postal Code</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Credit Limit</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Sales Rep Employee Number</th>
-                            <th className="px-2 py-1 text-center whitespace-nowrap">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {customers.map((customer, idx) => (
-                            <tr key={idx} className="hover:bg-gray-50">
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.customerName}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.id}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.contactFirstName}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.contactLastName}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.phone}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.addressLine1}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.addressLine2 || ''}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.city}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.state || ''}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.country}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.postalCode}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.creditLimit}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{customer.salesRepEmployeeNumber ? customer.salesRepEmployeeNumber.id : ''}</td>
-                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">
-                                    <button
-                                        className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                        onClick={() => handleEditClick(customer)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                                        onClick={() => handleDeleteClick(customer.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <div className="relative w-full overflow-x-hidden">
+                    <div className="flex justify-end mb-2 gap-2">
+                        <button onClick={handleScrollLeft} disabled={visibleColumnStart === 0} className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50">{'<'}</button>
+                        <button onClick={handleScrollRight} disabled={visibleColumnStart >= maxStart} className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50">{'>'}</button>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full border border-blue-300 min-w-max">
+                            <thead className="bg-[#f5f5f5] border-b-2 border-[#258cbf]">
+                                <tr>
+                                    {columns.slice(visibleColumnStart, visibleColumnStart + columnsPerView).map((col) => (
+                                        <th key={col.key} className="px-2 py-1 text-center whitespace-nowrap">{col.label}</th>
+                                    ))}
+                                    <th className="px-2 py-1 text-center whitespace-nowrap sticky right-0 bg-[#f5f5f5] z-10">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {customers.map((customer, idx) => (
+                                    <tr key={idx} className="hover:bg-gray-50">
+                                        {columns.slice(visibleColumnStart, visibleColumnStart + columnsPerView).map((col) => (
+                                            <td key={col.key} className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{
+                                                col.key === 'salesRepEmployeeNumber'
+                                                    ? (customer.salesRepEmployeeNumber ? customer.salesRepEmployeeNumber.id : '')
+                                                    : customer[col.key]
+                                            }</td>
+                                        ))}
+                                        <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap sticky right-0 bg-white z-10">
+                                            <button
+                                                className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                                                onClick={() => handleEditClick(customer)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                                                onClick={() => handleDeleteClick(customer.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             )}
             {toast.show && (
                 <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded shadow-lg text-white transition-all ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
