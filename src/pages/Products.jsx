@@ -30,6 +30,21 @@ const Products = () => {
     const [searchError, setSearchError] = useState('');
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchSuccess, setSearchSuccess] = useState('');
+    const [showAdd, setShowAdd] = useState(false);
+    const [addForm, setAddForm] = useState({
+        productCode: '',
+        productName: '',
+        productLine: '',
+        productVendor: '',
+        productScale: '',
+        buyPrice: '',
+        msrp: '',
+        quantityInStock: '',
+        productDescription: ''
+    });
+    const [addLoading, setAddLoading] = useState(false);
+    const [addError, setAddError] = useState('');
+    const [addSuccess, setAddSuccess] = useState('');
     const navigate = useNavigate();
 
     const fetchProducts = () => {
@@ -166,6 +181,53 @@ const Products = () => {
         setSearchSuccess('');
     };
 
+    const handleAddProduct = () => {
+        setShowAdd(true);
+        setAddForm({
+            productCode: '',
+            productName: '',
+            productLine: '',
+            productVendor: '',
+            productScale: '',
+            buyPrice: '',
+            msrp: '',
+            quantityInStock: '',
+            productDescription: ''
+        });
+        setAddError('');
+        setAddSuccess('');
+    };
+
+    const handleAddInput = (e) => {
+        const { name, value } = e.target;
+        setAddForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddSave = (e) => {
+        e.preventDefault();
+        setAddLoading(true);
+        setAddError('');
+        setAddSuccess('');
+        fetch('http://localhost:8081/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(addForm)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to add product');
+                return res.json();
+            })
+            .then(() => {
+                setAddSuccess('Product added successfully.');
+                setShowAdd(false);
+                fetchProducts();
+            })
+            .catch(err => {
+                setAddError(err.message);
+            })
+            .finally(() => setAddLoading(false));
+    };
+
     return (
         <div className="max-w-7xl mx-auto px-2 py-6">
             <h1 className="text-3xl font-bold text-center mb-6">Products</h1>
@@ -189,7 +251,7 @@ const Products = () => {
                         {searchLoading ? 'Searching...' : 'Search'}
                     </button>
                 </div>
-                <button onClick={() => navigate('/product')} className="bg-[#4a90e2] cursor-pointer text-white px-8 py-1.5 rounded hover:bg-blue-400 transition">
+                <button onClick={handleAddProduct} className="bg-[#4a90e2] cursor-pointer text-white px-8 py-1.5 rounded hover:bg-blue-400 transition">
                     Add Product
                 </button>
             </div>
@@ -272,45 +334,59 @@ const Products = () => {
                 </div>
             )}
             {/* View Modal */}
-            <Modal open={!!viewProduct} onClose={() => setViewProduct(null)}>
-                {viewProduct && (
-                    <div className="w-90 left-70 mx-auto px-4 py-4">
-                        <div className='flex flex-col items-center p-3 rounded-xl bg-[#234566] justify-center mb-4'>
-                            <h2 className='text-2xl font-bold text-white'>Good afternoon, Tim✨</h2>
-                            <p className='text-white'>Here is the latest on {viewProduct.productName}</p>
-                            <p className='text-white'>{new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                        </div>
-                        <div className='flex border-2 p-3 rounded-md border-[#9adcfd] flex-col mt-4'>
-                            <h3 className="text-2xl font-semibold">{viewProduct.productName}</h3>
-                            <p className="text-gray-600"> <strong>Description</strong> {viewProduct.productDescription} </p>
-                            <p> <strong>Vendor:</strong> {viewProduct.productVendor} </p>
-                            <p className='flex flex-row items-center gap-1'><IoScale className='text-black w-5 h-5' /> <strong>Scale:</strong> {viewProduct.productScale} </p>
-                            <p> <strong>Price:</strong> Kshs {viewProduct.buyPrice} </p>
-                            <div className='flex items-center justify-between'>
-                                <p> <strong>Stock:</strong> {viewProduct.quantityInStock} </p>
+            {viewProduct && (
+                <>
+                    {/* White translucent overlay, not covering sidebar (assume sidebar width 220px) */}
+                    <div className="fixed inset-0 z-40 bg-white bg-opacity-70" style={{ left: '220px', pointerEvents: 'auto' }}></div>
+                    <Modal open={!!viewProduct} onClose={() => setViewProduct(null)}>
+                        <div className="w-90 left-70 mx-auto px-4 py-4">
+                            <div className='flex flex-col items-center p-3 rounded-xl bg-[#234566] justify-center mb-4'>
+                                <h2 className='text-2xl font-bold text-white'>Good afternoon, Tim✨</h2>
+                                <p className='text-white'>Here is the latest on {viewProduct.productName}</p>
+                                <p className='text-white'>{new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                             </div>
-                            <p> <strong>Product Line:</strong> {
-                                typeof viewProduct.productLine === 'object'
-                                    ? (viewProduct.productLine.productLine || viewProduct.productLine.textDescription || '')
-                                    : viewProduct.productLine
-                            } </p>
+                            <div className='flex border-2 p-3 rounded-md border-[#9adcfd] flex-col mt-4'>
+                                <h3 className="text-2xl font-semibold">{viewProduct.productName}</h3>
+                                <p className="text-gray-600"> <strong>Description</strong> {viewProduct.productDescription} </p>
+                                <p> <strong>Vendor:</strong> {viewProduct.productVendor} </p>
+                                <p className='flex flex-row items-center gap-1'><IoScale className='text-black w-5 h-5' /> <strong>Scale:</strong> {viewProduct.productScale} </p>
+                                <p> <strong>Price:</strong> Kshs {viewProduct.buyPrice} </p>
+                                <div className='flex items-center justify-between'>
+                                    <p> <strong>Stock:</strong> {viewProduct.quantityInStock} </p>
+                                </div>
+                                <p> <strong>Product Line:</strong> {
+                                    typeof viewProduct.productLine === 'object'
+                                        ? (viewProduct.productLine.productLine || viewProduct.productLine.textDescription || '')
+                                        : viewProduct.productLine
+                                } </p>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </Modal>
+                    </Modal>
+                </>
+            )}
             {/* Edit Modal */}
             <Modal open={showEdit} onClose={() => setShowEdit(false)}>
                 <form onSubmit={handleEditSave}>
                     <h2 className="text-xl font-bold mb-4">Edit Product</h2>
                     <div className="grid grid-cols-1 gap-2">
-                        <input name="productName" value={editForm.productName || ''} onChange={handleEditInput} required placeholder="Product Name" className="border p-2 rounded" />
-                        <input name="productLine" value={typeof editForm.productLine === 'object' ? (editForm.productLine.productLine || editForm.productLine.textDescription || '') : (editForm.productLine || '')} onChange={handleEditInput} required placeholder="Product Line" className="border p-2 rounded" />
-                        <input name="productVendor" value={editForm.productVendor || ''} onChange={handleEditInput} required placeholder="Product Vendor" className="border p-2 rounded" />
-                        <input name="productScale" value={editForm.productScale || ''} onChange={handleEditInput} required placeholder="Product Scale" className="border p-2 rounded" />
-                        <input name="buyPrice" value={editForm.buyPrice || ''} onChange={handleEditInput} required placeholder="Buy Price" className="border p-2 rounded" />
-                        <input name="msrp" value={editForm.msrp || ''} onChange={handleEditInput} required placeholder="MSRP" className="border p-2 rounded" />
-                        <input name="quantityInStock" value={editForm.quantityInStock || ''} onChange={handleEditInput} required placeholder="Quantity In Stock" className="border p-2 rounded" />
-                        <textarea name="productDescription" value={editForm.productDescription || ''} onChange={handleEditInput} placeholder="Product Description" className="border p-2 rounded" />
+                        <div className="grid grid-cols-2 gap-2 items-center">
+                            <span className="font-semibold text-right pr-2">Product Name:</span>
+                            <input name="productName" value={editForm.productName || ''} onChange={handleEditInput} required placeholder="Product Name" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Line:</span>
+                            <input name="productLine" value={typeof editForm.productLine === 'object' ? (editForm.productLine.productLine || editForm.productLine.textDescription || '') : (editForm.productLine || '')} onChange={handleEditInput} required placeholder="Product Line" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Vendor:</span>
+                            <input name="productVendor" value={editForm.productVendor || ''} onChange={handleEditInput} required placeholder="Product Vendor" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Scale:</span>
+                            <input name="productScale" value={editForm.productScale || ''} onChange={handleEditInput} required placeholder="Product Scale" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Buy Price:</span>
+                            <input name="buyPrice" value={editForm.buyPrice || ''} onChange={handleEditInput} required placeholder="Buy Price" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">MSRP:</span>
+                            <input name="msrp" value={editForm.msrp || ''} onChange={handleEditInput} required placeholder="MSRP" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Quantity In Stock:</span>
+                            <input name="quantityInStock" value={editForm.quantityInStock || ''} onChange={handleEditInput} required placeholder="Quantity In Stock" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Description:</span>
+                            <textarea name="productDescription" value={editForm.productDescription || ''} onChange={handleEditInput} placeholder="Product Description" className="border p-2 rounded w-full" />
+                        </div>
                     </div>
                     <div className="flex gap-2 mt-4">
                         <button type="submit" disabled={saving} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
@@ -331,6 +407,42 @@ const Products = () => {
                     </div>
                 </div>
             )}
+            {/* Add Product Modal */}
+            <Modal open={showAdd} onClose={() => setShowAdd(false)}>
+                <form onSubmit={handleAddSave}>
+                    <h2 className="text-xl font-bold mb-4">Add Product</h2>
+                    {addError && <div className="text-red-500 mb-2">{addError}</div>}
+                    {addSuccess && <div className="text-green-600 mb-2">{addSuccess}</div>}
+                    <div className="grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-2 gap-2 items-center">
+                            <span className="font-semibold text-right pr-2">Product Code:</span>
+                            <input name="productCode" value={addForm.productCode} onChange={handleAddInput} required placeholder="Product Code" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Name:</span>
+                            <input name="productName" value={addForm.productName} onChange={handleAddInput} required placeholder="Product Name" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Line:</span>
+                            <input name="productLine" value={addForm.productLine} onChange={handleAddInput} required placeholder="Product Line" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Vendor:</span>
+                            <input name="productVendor" value={addForm.productVendor} onChange={handleAddInput} required placeholder="Product Vendor" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Scale:</span>
+                            <input name="productScale" value={addForm.productScale} onChange={handleAddInput} required placeholder="Product Scale" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Buy Price:</span>
+                            <input name="buyPrice" value={addForm.buyPrice} onChange={handleAddInput} required placeholder="Buy Price" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">MSRP:</span>
+                            <input name="msrp" value={addForm.msrp} onChange={handleAddInput} required placeholder="MSRP" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Quantity In Stock:</span>
+                            <input name="quantityInStock" value={addForm.quantityInStock} onChange={handleAddInput} required placeholder="Quantity In Stock" className="border p-2 rounded w-full" />
+                            <span className="font-semibold text-right pr-2">Product Description:</span>
+                            <textarea name="productDescription" value={addForm.productDescription} onChange={handleAddInput} placeholder="Product Description" className="border p-2 rounded w-full" />
+                        </div>
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                        <button type="submit" disabled={addLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                            {addLoading ? 'Saving...' : 'Save Product'}
+                        </button>
+                        <button type="button" onClick={() => setShowAdd(false)} className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition">Cancel</button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 };
