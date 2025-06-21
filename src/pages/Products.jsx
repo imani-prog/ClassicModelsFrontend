@@ -45,6 +45,8 @@ const Products = () => {
     const [addLoading, setAddLoading] = useState(false);
     const [addError, setAddError] = useState('');
     const [addSuccess, setAddSuccess] = useState('');
+    const [globalAddSuccess, setGlobalAddSuccess] = useState('');
+    const [globalAddError, setGlobalAddError] = useState('');
     const navigate = useNavigate();
 
     const fetchProducts = () => {
@@ -196,6 +198,16 @@ const Products = () => {
         });
         setAddError('');
         setAddSuccess('');
+        setGlobalAddError('');
+        setGlobalAddSuccess('');
+    };
+
+    const handleCloseAddModal = () => {
+        setShowAdd(false);
+        setAddError('');
+        setAddSuccess('');
+        setGlobalAddError('');
+        setGlobalAddSuccess('');
     };
 
     const handleAddInput = (e) => {
@@ -208,6 +220,8 @@ const Products = () => {
         setAddLoading(true);
         setAddError('');
         setAddSuccess('');
+        setGlobalAddError('');
+        setGlobalAddSuccess('');
         fetch('http://localhost:8081/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -218,18 +232,32 @@ const Products = () => {
                 return res.json();
             })
             .then(() => {
-                setAddSuccess('Product added successfully.');
+                setAddSuccess(''); // Clear modal success
+                setGlobalAddSuccess('Product added successfully.');
                 setShowAdd(false);
                 fetchProducts();
+                setTimeout(() => setGlobalAddSuccess(''), 3000);
             })
             .catch(err => {
                 setAddError(err.message);
+                setGlobalAddError(err.message);
+                setTimeout(() => setGlobalAddError(''), 4000);
             })
             .finally(() => setAddLoading(false));
     };
 
+    useEffect(() => {
+        if (addSuccess) {
+            const timer = setTimeout(() => setAddSuccess(''), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [addSuccess]);
+
     return (
         <div className="max-w-7xl mx-auto px-2 py-6">
+            {/* Global Add Feedback */}
+            {globalAddSuccess && <div className="text-green-600 mb-2 text-center font-semibold">{globalAddSuccess}</div>}
+            {globalAddError && <div className="text-red-500 mb-2 text-center font-semibold">{globalAddError}</div>}
             <h1 className="text-3xl font-bold text-center mb-6">Products</h1>
             <div className="flex items-center justify-between mb-4">
                 <div className="relative flex gap-2 items-center">
@@ -408,11 +436,10 @@ const Products = () => {
                 </div>
             )}
             {/* Add Product Modal */}
-            <Modal open={showAdd} onClose={() => setShowAdd(false)}>
+            <Modal open={showAdd} onClose={() => { setShowAdd(false); setAddError(''); setAddSuccess(''); setGlobalAddError(''); setGlobalAddSuccess(''); }}>
                 <form onSubmit={handleAddSave}>
                     <h2 className="text-xl font-bold mb-4">Add Product</h2>
                     {addError && <div className="text-red-500 mb-2">{addError}</div>}
-                    {addSuccess && <div className="text-green-600 mb-2">{addSuccess}</div>}
                     <div className="grid grid-cols-1 gap-2">
                         <div className="grid grid-cols-2 gap-2 items-center">
                             <span className="font-semibold text-right pr-2">Product Code:</span>
