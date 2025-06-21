@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import { IoSearch } from 'react-icons/io5';
@@ -29,6 +29,9 @@ const Customers = () => {
     const [searchResult, setSearchResult] = useState(null);
     const [searchError, setSearchError] = useState('');
     const [searchEditMode, setSearchEditMode] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+    const toastTimeout = useRef(null);
+    const [confirmDialog, setConfirmDialog] = useState({ show: false, customerId: null });
 
     const fetchCustomers = () => {
         setLoading(true);
@@ -47,6 +50,12 @@ const Customers = () => {
     useEffect(() => {
         fetchCustomers();
     }, []);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+        if (toastTimeout.current) clearTimeout(toastTimeout.current);
+        toastTimeout.current = setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -74,18 +83,27 @@ const Customers = () => {
     };
 
     const handleDeleteClick = (customerId) => {
-        if (window.confirm('Are you sure you want to delete this customer?')) {
-            fetch(`http://localhost:8081/customers/${customerId}`, {
-                method: 'DELETE'
+        setConfirmDialog({ show: true, customerId });
+    };
+
+    const confirmDelete = () => {
+        const customerId = confirmDialog.customerId;
+        setConfirmDialog({ show: false, customerId: null });
+        fetch(`http://localhost:8081/customers/${customerId}`, {
+            method: 'DELETE'
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error('Failed to delete customer');
+                showToast('Customer deleted successfully!', 'success');
+                fetchCustomers();
             })
-                .then((res) => {
-                    if (!res.ok) throw new Error('Failed to delete customer');
-                    fetchCustomers();
-                })
-                .catch((err) => {
-                    alert(err.message);
-                });
-        }
+            .catch((err) => {
+                showToast(err.message, 'error');
+            });
+    };
+
+    const cancelDelete = () => {
+        setConfirmDialog({ show: false, customerId: null });
     };
 
     const handleAddCustomer = (e) => {
@@ -130,9 +148,10 @@ const Customers = () => {
                     salesRepEmployeeNumber: ''
                 });
                 fetchCustomers();
+                showToast(editMode ? 'Customer updated successfully!' : 'Customer added successfully!', 'success');
             })
             .catch((err) => {
-                alert(err.message);
+                showToast(err.message, 'error');
             })
             .finally(() => setSaving(false));
     };
@@ -182,9 +201,10 @@ const Customers = () => {
             .then(() => {
                 setSearchEditMode(false);
                 fetchCustomers();
+                showToast('Customer updated successfully!', 'success');
             })
             .catch(err => {
-                alert(err.message);
+                showToast(err.message, 'error');
             });
     };
 
@@ -353,6 +373,25 @@ const Customers = () => {
                         ))}
                     </tbody>
                 </table>
+            )}
+            {toast.show && (
+                <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded shadow-lg text-white transition-all ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+                    {toast.message}
+                </div>
+            )}
+            {confirmDialog.show && (
+                <>
+                    <div className="fixed inset-0 z-40 bg-gray-200 opacity-60 cursor-not-allowed"></div>
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm flex flex-col items-center">
+                            <p className="mb-4 text-lg font-semibold text-gray-800">Are you sure you want to delete this customer?</p>
+                            <div className="flex gap-4">
+                                <button onClick={confirmDelete} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+                                <button onClick={cancelDelete} className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     )
