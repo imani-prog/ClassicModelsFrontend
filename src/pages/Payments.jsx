@@ -1,19 +1,34 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
-import { IoSearch } from 'react-icons/io5'
+import { IoSearch } from 'react-icons/io5';
 
 const Payments = () => {
-    const payments = [
-        { customerId: 'C001', checkNo: '01234', amount: '4500', date: '31/2/2025' },
-        { customerId: 'C002', checkNo: '56874', amount: '3570', date: '4/06/2025' },
-        { customerId: 'C003', checkNo: '76847', amount: '7890', date: '8/12/2025' },
-        { customerId: 'C004', checkNo: '24356', amount: '500', date: '21/9/2025' },
-    ];
+    const [payments, setPayments] = useState([]);
+
+    useEffect(() => {
+        fetch('http://localhost:8081/payments')
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to fetch payments");
+                return res.json();
+            })
+            .then(data => {
+                const mappedPayments = data.map(payment => ({
+                    customerId: payment.id.customerNumber,
+                    checkNo: payment.id.checkNumber,
+                    amount: payment.amount,
+                    date: payment.paymentDate
+                }));
+                setPayments(mappedPayments);
+            })
+            .catch(err => {
+                console.error("Error fetching payments:", err);
+            });
+    }, []);
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className='items-center justify-center w-full flex flex-col mb-6'>
-                <h1 className="text-3xl font-bold text-center mb-6">Payments
-                </h1>
+                <h1 className="text-3xl font-bold text-center mb-6">Payments</h1>
                 <button className="bg-[#4a90e2] flex flex-row gap-2 items-center cursor-pointer text-white px-8 py-1.5 
                            rounded hover:bg-blue-400 transition">
                     <FaPlus className='text-black text-lg' />
@@ -25,10 +40,9 @@ const Payments = () => {
                     <input
                         type="text"
                         placeholder="Search payment"
-                        className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-13 pr-4
-                                "
+                        className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-13 pr-4"
                     />
-                    <span className="absolute  left-3 top-2.5 ">
+                    <span className="absolute left-3 top-2.5">
                         <IoSearch className="w-5 h-5" />
                     </span>
                 </div>
@@ -53,9 +67,8 @@ const Payments = () => {
                     ))}
                 </tbody>
             </table>
-
         </div>
-    )
-}
+    );
+};
 
-export default Payments
+export default Payments;
