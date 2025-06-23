@@ -16,17 +16,17 @@ function Modal({ open, onClose, children }) {
     );
 }
 
-// Helper to format date as YYYY-MM-DD or locale string
+
 const formatDate = (d) => {
     if (!d) return '';
-    // If already in YYYY-MM-DD, return as is
+    
     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
-    // If it's a number (e.g. 20250623), parse as YYYYMMDD
+
     if (/^\d{8}$/.test(String(d))) {
         const s = String(d);
         return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
     }
-    // Try to parse as date
+    
     const dateObj = new Date(d);
     if (!isNaN(dateObj)) return dateObj.toLocaleDateString();
     return d;
