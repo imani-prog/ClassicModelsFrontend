@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 
-function Modal({ open, onClose, children }) {
+function Modal({ open, onClose, children, wide = false }) {
     if (!open) return null;
     return (
         <>
             <div className="fixed inset-0 z-40  bg-opacity-30" style={{ left: '220px', pointerEvents: 'auto' }}></div>
             <div className="fixed inset-0 flex items-center justify-center z-50">
-                <div className="bg-white border border-blue-300 rounded-lg p-6 w-full max-w-md shadow-md relative">
+                <div
+                    className={
+                        wide
+                            ? "bg-white border border-blue-300 rounded-lg p-6 w-full max-w-[98vw] md:max-w-[900px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] shadow-md relative"
+                            : "bg-white border border-blue-300 rounded-lg p-6 w-full max-w-md shadow-md relative"
+                    }
+                >
                     <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl" onClick={onClose} type="button">&times;</button>
                     {children}
                 </div>
@@ -53,6 +59,7 @@ const Payments = () => {
     const [searchError, setSearchError] = useState('');
     const [searchLoading, setSearchLoading] = useState(false);
     const [showSearchModal, setShowSearchModal] = useState(false);
+    const [searchCustomerDetails, setSearchCustomerDetails] = useState({});
 
     useEffect(() => {
         fetch('http://localhost:8081/payments')
@@ -150,6 +157,21 @@ const Payments = () => {
             .finally(() => setDeleteLoading(false));
     };
 
+    const fetchCustomerDetails = async (customerNumber) => {
+        if (!customerNumber) return null;
+        // Avoid duplicate fetches
+        if (searchCustomerDetails[customerNumber]) return searchCustomerDetails[customerNumber];
+        try {
+            const res = await fetch(`http://localhost:8081/customers/${customerNumber}`);
+            if (!res.ok) throw new Error('Failed to fetch customer');
+            const data = await res.json();
+            setSearchCustomerDetails(prev => ({ ...prev, [customerNumber]: data }));
+            return data;
+        } catch {
+            return null;
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className='items-center justify-center w-full flex flex-col mb-6'>
@@ -178,14 +200,23 @@ const Payments = () => {
                                 return res.json();
                             })
                             .then(data => {
-                                setSearchResult([
-                                    {
+                                const results = Array.isArray(data)
+                                    ? data.map(payment => ({
+                                        customerId: payment.id.customerNumber,
+                                        checkNo: payment.id.checkNumber,
+                                        amount: payment.amount,
+                                        date: payment.paymentDate
+                                    }))
+                                    : [{
                                         customerId: data.id.customerNumber,
                                         checkNo: data.id.checkNumber,
                                         amount: data.amount,
                                         date: data.paymentDate
-                                    }
-                                ]);
+                                    }];
+                                setSearchResult(results);
+                                // Fetch customer info for all unique customerNumbers
+                                const uniqueCustomers = [...new Set(results.map(r => r.customerId))];
+                                uniqueCustomers.forEach(cn => fetchCustomerDetails(cn));
                                 setShowSearchModal(true);
                             })
                             .catch(err => setSearchError(err.message))
@@ -207,6 +238,9 @@ const Payments = () => {
                                     }));
                                 if (matches.length === 0) throw new Error('No payments found for this Customer ID');
                                 setSearchResult(matches);
+                                // Fetch customer info for all unique customerNumbers
+                                const uniqueCustomers = [...new Set(matches.map(m => m.customerId))];
+                                uniqueCustomers.forEach(cn => fetchCustomerDetails(cn));
                                 setShowSearchModal(true);
                             })
                             .catch(err => setSearchError(err.message))
@@ -228,6 +262,9 @@ const Payments = () => {
                                     }));
                                 if (matches.length === 0) throw new Error('No payments found for this Check No');
                                 setSearchResult(matches);
+                                // Fetch customer info for all unique customerNumbers
+                                const uniqueCustomers = [...new Set(matches.map(m => m.customerId))];
+                                uniqueCustomers.forEach(cn => fetchCustomerDetails(cn));
                                 setShowSearchModal(true);
                             })
                             .catch(err => setSearchError(err.message))
@@ -374,34 +411,55 @@ const Payments = () => {
                 </form>
             </Modal>
             <Modal open={showSearchModal} onClose={() => setShowSearchModal(false)}>
-                {searchResult && Array.isArray(searchResult) && searchResult.length > 0 && (
-                    <div>
-                        <h2 className="text-xl font-bold mb-4">Payment Details</h2>
-                        <table className="w-full border border-blue-300 mb-4">
-                            <thead className="bg-[#f5f5f5] border-b-2 border-[#258cbf]">
-                                <tr>
-                                    <th className="px-4 py-2 text-center whitespace-nowrap">Customer ID</th>
-                                    <th className="px-4 py-2 text-center whitespace-nowrap">Check No</th>
-                                    <th className="px-4 py-2 text-center whitespace-nowrap">Amount</th>
-                                    <th className="px-4 py-2 text-center whitespace-nowrap">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {searchResult.map((result, idx) => (
-                                    <tr key={idx}>
-                                        <td className="border-t-2 text-center border-[#42befb] px-4 py-2 whitespace-nowrap">{result.customerId}</td>
-                                        <td className="border-t-2 text-center border-[#42befb] px-4 py-2 whitespace-nowrap">{result.checkNo}</td>
-                                        <td className="border-t-2 text-center border-[#42befb] px-4 py-2 whitespace-nowrap">Kshs {result.amount}</td>
-                                        <td className="border-t-2 text-center border-[#42befb] px-4 py-2 whitespace-nowrap">{formatDate(result.date)}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        <div className="flex gap-2 mt-4">
-                            <button type="button" onClick={() => setShowSearchModal(false)} className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition">Close</button>
+                {searchResult && Array.isArray(searchResult) && searchResult.length > 0 ? (
+                    <div className="w-full flex flex-col items-center justify-center">
+                        <h2 className="text-2xl font-bold mb-4 text-center">Payment Details</h2>
+                        <div className="rounded border border-blue-200 bg-white w-full max-w-sm mx-auto p-4 flex flex-col items-center justify-center" style={{ maxHeight: '500px', minWidth: '340px' }}>
+                            {searchResult.map((result, idx) => {
+                                const cust = searchCustomerDetails[result.customerId] || {};
+                                return (
+                                    <div key={idx} className="w-full flex flex-col gap-2 mb-4 last:mb-0 border-b last:border-b-0 border-blue-100 pb-4 last:pb-0">
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Customer Name:</span>
+                                            <span className="w-1/2 text-left break-words">{cust.customerName || '-'}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Customer Number</span>
+                                            <span className="w-1/2 text-left break-words">{result.customerId}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Contact 1st Name</span>
+                                            <span className="w-1/2 text-left break-words">{cust.contactFirstName || '-'}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Contact 2nd Name</span>
+                                            <span className="w-1/2 text-left break-words">{cust.contactLastName || '-'}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Phone Number:</span>
+                                            <span className="w-1/2 text-left break-words">{cust.phone || '-'}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Check No:</span>
+                                            <span className="w-1/2 text-left break-words">{result.checkNo}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Amount:</span>
+                                            <span className="w-1/2 text-left break-words">Kshs {result.amount}</span>
+                                        </div>
+                                        <div className="flex flex-row w-full">
+                                            <span className="font-semibold w-1/2 text-right pr-3">Date:</span>
+                                            <span className="w-1/2 text-left break-words">{formatDate(result.date)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className="flex gap-4 mt-6 justify-center">
+                            <button type="button" onClick={() => setShowSearchModal(false)} className="bg-gray-300 text-black px-6 py-2 rounded hover:bg-gray-400 transition text-lg">Close</button>
                         </div>
                     </div>
-                )}
+                ) : null}
             </Modal>
         </div>
     );
