@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { FaArrowDown, FaArrowUp, FaBell, FaBox, FaClipboardCheck, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
+import TopPayments from '../components/TopPayments';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA66CC', '#FF4444', '#33B5E5'];
 
@@ -148,6 +149,8 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                             <Bar dataKey="orders" fill="#4a90e2" />
                         </BarChart>
                     </div>
+
+                    <TopPayments />
 
                     {/* Recent Activity */}
                     {/* <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
