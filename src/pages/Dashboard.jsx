@@ -13,6 +13,7 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
     const [chartData, setChartData] = useState([]);
     const [orderTrendData, setOrderTrendData] = useState([]);
     const [notifications, setNotifications] = useState([]);
+    const [activities, setActivities] = useState([]); // <-- Added
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
@@ -22,12 +23,14 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
             fetch('http://localhost:8081/api/dashboard/entity-distribution').then(res => res.json()),
             fetch('http://localhost:8081/api/dashboard/order-trend').then(res => res.json()),
             fetch('http://localhost:8081/api/dashboard/notifications').then(res => res.json()),
+            fetch('http://localhost:8081/api/dashboard/activity').then(res => res.json()) // <-- Fetch activities
         ])
-        .then(([statsRes, chartRes, trendRes, notifRes]) => {
+        .then(([statsRes, chartRes, trendRes, notifRes, activityRes]) => {
             setStats(statsRes);
             setChartData(chartRes);
             setOrderTrendData(trendRes);
             setNotifications(notifRes);
+            setActivities(activityRes); // <-- Set activity data
             setLoading(false);
         })
         .catch(err => {
@@ -150,14 +153,20 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
+                    {/* <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
                         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                         <ul className="list-disc ml-6 space-y-2">
-                            {notifications.map((note, i) => (
-                                <li key={i} className="text-gray-700">{note}</li>
-                            ))}
+                            {activities.length > 0 ? (
+                                activities.map((activity, i) => (
+                                    <li key={i} className="text-gray-700">
+                                        [{new Date(activity.timestamp).toLocaleString()}] - {activity.entityType} {activity.action.toLowerCase()} - {activity.description}
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="text-gray-500">No recent activity</li>
+                            )}
                         </ul>
-                    </div>
+                    </div> */}
                 </div>
                 </>
             )}
