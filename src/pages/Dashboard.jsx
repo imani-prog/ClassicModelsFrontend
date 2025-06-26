@@ -3,6 +3,7 @@ import { FaArrowDown, FaArrowUp, FaBell, FaBox, FaClipboardCheck, FaUsers } from
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
 import TopPayments from '../components/TopPayments';
+import RevenueCard from '../components/RevenueCard';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA66CC', '#FF4444', '#33B5E5'];
 
@@ -15,6 +16,8 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
     const [orderTrendData, setOrderTrendData] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [revenue, setRevenue] = useState(null);
+
 
     useEffect(() => {
         setLoading(true);
@@ -23,12 +26,14 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
             fetch('http://localhost:8081/api/dashboard/entity-distribution').then(res => res.json()),
             fetch('http://localhost:8081/api/dashboard/order-trend').then(res => res.json()),
             fetch('http://localhost:8081/api/dashboard/notifications').then(res => res.json()),
+            fetch('http://localhost:8081/api/dashboard/revenue-summary').then(res => res.json()),
         ])
-        .then(([statsRes, chartRes, trendRes, notifRes,]) => {
+        .then(([statsRes, chartRes, trendRes, notifRes,revenueRes,]) => {
             setStats(statsRes);
             setChartData(chartRes);
             setOrderTrendData(trendRes);
             setNotifications(notifRes);
+            setRevenue(revenueRes);
             setLoading(false);
         })
         .catch(err => {
@@ -63,7 +68,7 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                 <div className="text-center text-red-500 py-10">{error}</div>
             ) : (
                 <>
-                <div className="flex flex-col md:flex-row justify-center items-center gap-6 mt-6">
+                <div className="max-w-6xl mx-auto px-4 mt-6 flex flex-col md:flex-row justify-center items-center gap-4">
                     {/* Products Card */}
                     <div>
                         <div className="border-3 border-[#57acee] rounded-lg p-10 text-center w-60">
@@ -120,6 +125,9 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                             </button>
                         </div>
                     </div>
+
+                    <RevenueCard revenue={revenue} />
+
                 </div>
 
                 {/* Insights Section */}
