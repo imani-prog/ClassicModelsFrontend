@@ -13,7 +13,6 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
     const [chartData, setChartData] = useState([]);
     const [orderTrendData, setOrderTrendData] = useState([]);
     const [notifications, setNotifications] = useState([]);
-    const [activities, setActivities] = useState([]); // <-- Added
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
@@ -23,14 +22,12 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
             fetch('http://localhost:8081/api/dashboard/entity-distribution').then(res => res.json()),
             fetch('http://localhost:8081/api/dashboard/order-trend').then(res => res.json()),
             fetch('http://localhost:8081/api/dashboard/notifications').then(res => res.json()),
-            fetch('http://localhost:8081/api/dashboard/activity').then(res => res.json()) // <-- Fetch activities
         ])
-        .then(([statsRes, chartRes, trendRes, notifRes, activityRes]) => {
+        .then(([statsRes, chartRes, trendRes, notifRes,]) => {
             setStats(statsRes);
             setChartData(chartRes);
             setOrderTrendData(trendRes);
             setNotifications(notifRes);
-            setActivities(activityRes); // <-- Set activity data
             setLoading(false);
         })
         .catch(err => {
