@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
 import TopPayments from '../components/TopPayments';
 import RevenueCard from '../components/RevenueCard';
+import TopProducts from '../components/TopProducts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA66CC', '#FF4444', '#33B5E5'];
 
@@ -43,6 +44,7 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
     }, []);
 
     return (
+       
         <div className="items-center justify-center min-h-screen w-full p-4">
             <div className="flex justify-between items-center relative">
                 <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
@@ -157,8 +159,19 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                             <Bar dataKey="orders" fill="#4a90e2" />
                         </BarChart>
                     </div>
+                     {/* <TopPayments />
+                     <TopProducts /> */}
+<div className="mt-6 flex flex-col lg:flex-row lg:space-x-6 w-full">
+  <div className="flex-1">
+    <TopPayments />
+  </div>
+  <div className="flex-1">
+    <TopProducts />
+  </div>
+</div>
 
-                    <TopPayments />
+
+
 
                     {/* Recent Activity */}
                     {/* <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
