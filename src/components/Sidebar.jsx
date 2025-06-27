@@ -29,6 +29,9 @@ const Sidebar = () => {
       <div className="flex items-left justify-left px-4 py-3 border-b border-gray-700">
         <h1 className="text-lg text-left font-bold text-[#4a90e2]">Classic<span className="text-white">Models</span></h1>
       </div>
+      <div className="px-4 py-2">
+        <p className="text-sm text-slate-400 mt-1">Business Management</p>
+      </div>
 
       {/* Navigation */}
       <nav className="mt-4">

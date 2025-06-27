@@ -254,12 +254,15 @@ const Products = () => {
     }, [addSuccess]);
 
     return (
-        <div className="max-w-7xl mx-auto px-2 py-6">
+        <div className="max-w-7xl mx-auto px-2 py-6 mt-0 pt-0">
             {/* Global Add Feedback */}
             {globalAddSuccess && <div className="text-green-600 mb-2 text-center font-semibold">{globalAddSuccess}</div>}
             {globalAddError && <div className="text-red-500 mb-2 text-center font-semibold">{globalAddError}</div>}
-            <h1 className="text-3xl font-bold text-center mb-6">Products</h1>
-            <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+              <p className="text-sm text-gray-600 mt-1">Manage your product inventory</p>
+            </div>
+            <div className="flex items-center justify-between mb-4 mt-5">
                 <div className="relative flex gap-2 items-center">
                     <input
                         type="text"
