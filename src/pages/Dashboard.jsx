@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAx
 import TopPayments from '../components/TopPayments';
 import RevenueCard from '../components/RevenueCard';
 import TopProducts from '../components/TopProducts';
+import OrderStatusTrendChart from '../components/OrderStatusTrendChart';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA66CC', '#FF4444', '#33B5E5'];
 
@@ -131,6 +132,7 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                     <RevenueCard revenue={revenue} />
 
                 </div>
+                <OrderStatusTrendChart />
 
                 {/* Insights Section */}
                 <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">

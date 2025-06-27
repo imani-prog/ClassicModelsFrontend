@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound'
 import ProductCard from './components/ProductCard'
 import OrderCard from './components/OrderCard'
 import Layout from './components/Layout'
+// import Navbar from './components/Navbar'
 
 
 const App = () => {
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/employees" element={<Employees />} />
         <Route path="/offices" element={<Offices />} />
         <Route path="/orders" element={<Orders />} />
+        {/* <Route path="/Navbar" element={<Navbar />} /> */}
         <Route path="/payments" element={<Payments />} />
         <Route path="/products" element={<Products />} />
         <Route path="/product" element={<ProductCard />} />

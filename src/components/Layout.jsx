@@ -1,45 +1,47 @@
-import React, { useEffect, useState, createContext } from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-
-
+import Navbar from "./Navbar"; // ✅ Make sure you have this component
 
 const Layout = () => {
-    const [isOpen, setIsOpen] = useState(true);
-    const [darkMode, setDarkMode] = useState(() => {
-        return localStorage.getItem("darkMode") === "false";
-    });
+  const [isOpen, setIsOpen] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "false";
+  });
 
-    // useEffect(() => {
-    //     localStorage.setItem("darkMode", darkMode);
-    // }, [darkMode]);
+  return (
+    <>
+      {/* Sidebar (fixed left) */}
+      <Sidebar
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+      />
 
+      {/* Top Navbar (fixed) */}
+      <div className={`ml-${isOpen ? "60" : "16"}`}>
+        <Navbar
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
+      </div>
 
-
-    return (
-        <>
-            {/* Main Layout Wrapper */}
-            <div className={`h-screen flex  ${darkMode ? "bg-gray-700" : "bg-gray-100"} `}>
-
-                {/* Sidebar (Fixed) */}
-                <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} darkMode={darkMode} setDarkMode={setDarkMode} />
-                {/* Main Content Section */}
-                <main
-                    className={`flex-1 
-                    ${darkMode ? "bg-gray-700 border-gray-300 text-white" : "bg-[#f3f4f6] text-black "}
-                    ${isOpen ? "ml-60" : "ml-16"}
-                    overflow-y-auto transition-all duration-300`}
-                >
-                    {/* <Navbar isOpen={isOpen} setIsOpen={setIsOpen}
-                        darkMode={darkMode} setDarkMode={setDarkMode}
-                    /> */}
-                    <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />
-                </main>
-            </div>
-
-        </>
-
-    );
+      {/* Main Content */}
+      <div
+        className={`
+          pt-16  // Push below navbar
+          ${isOpen ? "ml-60" : "ml-16"} 
+          ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-black"} 
+          min-h-screen p-4 transition-all duration-300
+        `}
+      >
+        <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />
+      </div>
+    </>
+  );
 };
 
 export default Layout;
