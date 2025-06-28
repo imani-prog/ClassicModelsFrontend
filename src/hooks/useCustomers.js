@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const useCustomers = () => {
     const [customers, setCustomers] = useState([]);
@@ -8,6 +8,13 @@ const useCustomers = () => {
     const [saving, setSaving] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [editCustomerId, setEditCustomerId] = useState(null);
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalCustomers, setTotalCustomers] = useState(0);
+    const [itemsPerPage] = useState(10); // Fixed items per page
+    
     const [form, setForm] = useState({
         customerName: '',
         contactLastName: '',
@@ -30,6 +37,9 @@ const useCustomers = () => {
     const toastTimeout = useRef(null);
     const [confirmDialog, setConfirmDialog] = useState({ show: false, customerId: null });
     const [visibleColumnStart, setVisibleColumnStart] = useState(0);
+    
+    // Bulk selection state
+    const [selectedCustomers, setSelectedCustomers] = useState([]);
 
     const columns = [
         { key: 'customerName', label: 'Customer Name' },
@@ -49,23 +59,74 @@ const useCustomers = () => {
     const columnsPerView = 13;
     const maxStart = columns.length - columnsPerView;
 
-    const fetchCustomers = () => {
+    const fetchCustomers = useCallback((page = 1) => {
+        console.log('fetchCustomers called with page:', page);
         setLoading(true);
+        // For now, fetch all customers and paginate on frontend
+        // Later, this can be updated to use backend pagination
         fetch('http://localhost:8081/customers')
             .then((res) => res.json())
-            .then((data) => {
-                setCustomers(data);
+            .then((allData) => {
+                console.log('Fetched data:', allData.length, 'customers');
+                const totalItems = allData.length;
+                const totalPagesCount = Math.ceil(totalItems / itemsPerPage);
+                
+                // Ensure page is within valid range
+                const validPage = Math.max(1, Math.min(page, totalPagesCount || 1));
+                const startIndex = (validPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const pageData = allData.slice(startIndex, endIndex);
+                
+                console.log('Page:', validPage, 'Total Pages:', totalPagesCount, 'Showing:', pageData.length, 'customers');
+                
+                setCustomers(pageData);
+                setTotalPages(totalPagesCount);
+                setTotalCustomers(totalItems);
+                setCurrentPage(validPage);
                 setLoading(false);
             })
             .catch((err) => {
+                console.error('Error fetching customers:', err);
                 setError(err.message);
                 setLoading(false);
             });
-    };
+    }, [itemsPerPage]);
 
     useEffect(() => {
-        fetchCustomers();
+        fetchCustomers(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Pagination handlers
+    const handlePageChange = (page) => {
+        console.log('handlePageChange called with page:', page, 'totalPages:', totalPages);
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+            fetchCustomers(page);
+        }
+    };
+
+    const handleNextPage = () => {
+        console.log('handleNextPage called, currentPage:', currentPage, 'totalPages:', totalPages);
+        if (currentPage < totalPages) {
+            handlePageChange(currentPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        console.log('handlePrevPage called, currentPage:', currentPage, 'totalPages:', totalPages);
+        if (currentPage > 1) {
+            handlePageChange(currentPage - 1);
+        }
+    };
+
+    const handleFirstPage = () => {
+        handlePageChange(1);
+    };
+
+    const handleLastPage = () => {
+        handlePageChange(totalPages);
+    };
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -111,7 +172,53 @@ const useCustomers = () => {
             .then((res) => {
                 if (!res.ok) throw new Error('Failed to delete customer');
                 showToast('Customer deleted successfully!', 'success');
-                fetchCustomers();
+                fetchCustomers(currentPage);
+                // Clear selection if deleted customer was selected
+                setSelectedCustomers(prev => prev.filter(id => id !== customerId));
+            })
+            .catch((err) => {
+                showToast(err.message, 'error');
+            });
+    };
+
+    // Bulk selection handlers
+    const handleSelectCustomer = (customerId, isSelected) => {
+        setSelectedCustomers(prev => {
+            if (isSelected) {
+                return [...prev, customerId];
+            } else {
+                return prev.filter(id => id !== customerId);
+            }
+        });
+    };
+
+    const handleSelectAllCustomers = (isSelected) => {
+        if (isSelected) {
+            const allCustomerIds = customers.map(customer => customer.id || customer.customerNumber);
+            setSelectedCustomers(allCustomerIds);
+        } else {
+            setSelectedCustomers([]);
+        }
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedCustomers.length === 0) return;
+        
+        const deletePromises = selectedCustomers.map(customerId =>
+            fetch(`http://localhost:8081/customers/${customerId}`, {
+                method: 'DELETE'
+            })
+        );
+
+        Promise.all(deletePromises)
+            .then(responses => {
+                const failedDeletes = responses.filter(res => !res.ok);
+                if (failedDeletes.length > 0) {
+                    throw new Error(`Failed to delete ${failedDeletes.length} customers`);
+                }
+                showToast(`Successfully deleted ${selectedCustomers.length} customers!`, 'success');
+                setSelectedCustomers([]);
+                fetchCustomers(currentPage);
             })
             .catch((err) => {
                 showToast(err.message, 'error');
@@ -149,7 +256,7 @@ const useCustomers = () => {
             })
             .then(() => {
                 handleCloseForm();
-                fetchCustomers();
+                fetchCustomers(currentPage);
                 showToast(editMode ? 'Customer updated successfully!' : 'Customer added successfully!', 'success');
             })
             .catch((err) => {
@@ -222,7 +329,7 @@ const useCustomers = () => {
             })
             .then(() => {
                 setSearchEditMode(false);
-                fetchCustomers();
+                fetchCustomers(currentPage);
                 showToast('Customer updated successfully!', 'success');
             })
             .catch(err => {
@@ -270,6 +377,15 @@ const useCustomers = () => {
         columnsPerView,
         maxStart,
         
+        // Bulk selection state
+        selectedCustomers,
+        
+        // Pagination state
+        currentPage,
+        totalPages,
+        totalCustomers,
+        itemsPerPage,
+        
         // Actions
         handleInputChange,
         handleAddCustomer,
@@ -286,7 +402,19 @@ const useCustomers = () => {
         handleSearchClose,
         handleScrollLeft,
         handleScrollRight,
-        setSearchNumber
+        setSearchNumber,
+        
+        // Bulk selection actions
+        handleSelectCustomer,
+        handleSelectAllCustomers,
+        handleBulkDelete,
+        
+        // Pagination actions
+        handlePageChange,
+        handleNextPage,
+        handlePrevPage,
+        handleFirstPage,
+        handleLastPage
     };
 };
 

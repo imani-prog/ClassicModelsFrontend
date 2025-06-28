@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
 import Navbar from "./Navbar"; // ✅ Make sure you have this component
+import Sidebar from "./Sidebar";
 
 const Layout = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -32,13 +32,15 @@ const Layout = () => {
       {/* Main Content */}
       <div
         className={`
-          pt-16  // Push below navbar
+          pt-16  // Push below navbar (h-16) with minimal space
           ${isOpen ? "ml-60" : "ml-16"} 
           ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-black"} 
-          min-h-screen p-4 transition-all duration-300
+          h-screen overflow-hidden px-4 pb-4 transition-all duration-300
         `}
       >
-        <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />
+        <div className="h-full overflow-auto">
+          <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />
+        </div>
       </div>
     </>
   );

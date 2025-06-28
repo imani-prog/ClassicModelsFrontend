@@ -12,16 +12,25 @@ const CustomerForm = ({
     if (!showForm) return null;
 
     return (
-        <div className="w-full flex items-center justify-center mb-8">
-            <form onSubmit={onSubmit} className="relative bg-white border border-blue-300 rounded-lg p-6 w-full max-w-xl shadow-md flex flex-col gap-3">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition-colors text-2xl"
-                    title="Close"
-                >
-                    <IoMdClose />
-                </button>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <form 
+                onSubmit={onSubmit} 
+                className="relative bg-white border border-blue-300 rounded-lg p-6 w-full max-w-2xl shadow-lg flex flex-col gap-3 max-h-[90vh] overflow-y-auto"
+            >
+                {/* Header */}
+                <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                        {editMode ? 'Edit Customer' : 'Add New Customer'}
+                    </h3>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-red-600 transition-colors text-2xl"
+                        title="Close"
+                    >
+                        <IoMdClose />
+                    </button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700 mb-1">Customer Name *</label>
@@ -153,7 +162,7 @@ const CustomerForm = ({
                         {saving ? (editMode ? 'Saving...' : 'Saving...') : (editMode ? 'Save Changes' : 'Save Customer')}
                     </button>
                 </div>
-            </form>
+                </form>
         </div>
     );
 };
