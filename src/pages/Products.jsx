@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
+import { FaPlus } from 'react-icons/fa';
 import { IoScale, IoSearch } from 'react-icons/io5';
-import { useNavigate } from 'react-router-dom';
 
 function Modal({ open, onClose, children }) {
     if (!open) return null;
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white border border-blue-300 rounded-lg p-6 w-full max-w-md shadow-md relative">
+            <div className="bg-white border border-blue-300 rounded-lg p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto">
                 <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl" onClick={onClose} type="button">&times;</button>
                 {children}
             </div>
@@ -47,7 +47,6 @@ const Products = () => {
     const [addSuccess, setAddSuccess] = useState('');
     const [globalAddSuccess, setGlobalAddSuccess] = useState('');
     const [globalAddError, setGlobalAddError] = useState('');
-    const navigate = useNavigate();
 
     const fetchProducts = () => {
         setLoading(true);
@@ -202,14 +201,6 @@ const Products = () => {
         setGlobalAddSuccess('');
     };
 
-    const handleCloseAddModal = () => {
-        setShowAdd(false);
-        setAddError('');
-        setAddSuccess('');
-        setGlobalAddError('');
-        setGlobalAddSuccess('');
-    };
-
     const handleAddInput = (e) => {
         const { name, value } = e.target;
         setAddForm(prev => ({ ...prev, [name]: value }));
@@ -254,55 +245,87 @@ const Products = () => {
     }, [addSuccess]);
 
     return (
-        <div className="max-w-7xl mx-auto px-2 py-6 mt-10 pt-0">
+        <div className="max-w-6xl mx-auto px-2 h-full flex flex-col pt-2">
             {/* Global Add Feedback */}
             {globalAddSuccess && <div className="text-green-600 mb-2 text-center font-semibold">{globalAddSuccess}</div>}
             {globalAddError && <div className="text-red-500 mb-2 text-center font-semibold">{globalAddError}</div>}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-              <p className="text-sm text-gray-600 mt-1">Manage your product inventory</p>
-            </div>
-            <div className="flex items-center justify-between mb-4 mt-5">
-                <div className="relative flex gap-2 items-center">
-                    <input
-                        type="text"
-                        placeholder="Search by product code"
-                        value={searchCode}
-                        onChange={e => setSearchCode(e.target.value)}
-                        className="border-2 border-black rounded-md py-2 pl-10 pr-4"
-                    />
-                    <span className="absolute left-3 top-2.5">
-                        <IoSearch className="w-5 h-5" />
-                    </span>
-                    <button
-                        onClick={handleProductSearch}
-                        className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-                        disabled={searchLoading}
-                    >
-                        {searchLoading ? 'Searching...' : 'Search'}
-                    </button>
+            
+            {/* Header Section - Fixed height */}
+            <div className='flex items-start justify-start mb-3 flex-shrink-0'>
+                <div className="flex flex-col">
+                    <h1 className="text-2xl font-bold mb-1">Products</h1>
+                    <p className="text-gray-600 text-sm">Manage your product inventory</p>
                 </div>
-                <button onClick={handleAddProduct} className="bg-[#4a90e2] cursor-pointer text-white px-8 py-1.5 rounded hover:bg-blue-400 transition">
-                    Add Product
-                </button>
             </div>
-            {searchError && <div className="text-red-500 mb-2">{searchError}</div>}
-            {searchSuccess && <div className="text-green-600 mb-2">{searchSuccess}</div>}
-            {searchResult && (
-                <div className="border border-blue-300 rounded-lg p-6 w-full max-w-lg mx-auto mb-6 bg-white shadow relative">
-                    <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl" onClick={handleCloseSearchResult} type="button">&times;</button>
-                    <form onSubmit={handleSearchEditSave}>
-                        <h2 className="text-xl font-bold mb-4">Edit Product</h2>
-                        <div className="grid grid-cols-1 gap-2">
-                            <input name="productName" value={searchResult.productName || ''} onChange={handleSearchEditInput} required placeholder="Product Name" className="border p-2 rounded" />
-                            <input name="productLine" value={typeof searchResult.productLine === 'object' ? (searchResult.productLine.productLine || searchResult.productLine.textDescription || '') : (searchResult.productLine || '')} onChange={handleSearchEditInput} required placeholder="Product Line" className="border p-2 rounded" />
-                            <input name="productVendor" value={searchResult.productVendor || ''} onChange={handleSearchEditInput} required placeholder="Product Vendor" className="border p-2 rounded" />
-                            <input name="productScale" value={searchResult.productScale || ''} onChange={handleSearchEditInput} required placeholder="Product Scale" className="border p-2 rounded" />
-                            <input name="buyPrice" value={searchResult.buyPrice || ''} onChange={handleSearchEditInput} required placeholder="Buy Price" className="border p-2 rounded" />
-                            <input name="msrp" value={searchResult.msrp || ''} onChange={handleSearchEditInput} required placeholder="MSRP" className="border p-2 rounded" />
-                            <input name="quantityInStock" value={searchResult.quantityInStock || ''} onChange={handleSearchEditInput} required placeholder="Quantity In Stock" className="border p-2 rounded" />
-                            <textarea name="productDescription" value={searchResult.productDescription || ''} onChange={handleSearchEditInput} placeholder="Product Description" className="border p-2 rounded" />
-                        </div>
+            
+            {/* Search Section - Fixed height */}
+            <div className="mb-3 flex-shrink-0">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="relative flex items-center">
+                        <input
+                            type="text"
+                            placeholder="Search by product code"
+                            value={searchCode}
+                            onChange={e => setSearchCode(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleProductSearch()}
+                            className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-10 pr-4"
+                        />
+                        <button
+                            className="absolute left-3 top-2.5 hover:text-blue-600 transition-colors cursor-pointer"
+                            onClick={handleProductSearch}
+                            type="button"
+                            title="Search"
+                            disabled={searchLoading}
+                        >
+                            <IoSearch className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleAddProduct}
+                            className="bg-[#4a90e2] items-center flex flex-row gap-2 cursor-pointer text-white px-6 py-2 rounded hover:bg-blue-400 transition"
+                        >
+                            <FaPlus className='text-black text-lg' />
+                            Add Product
+                        </button>
+                    </div>
+                </div>
+                {searchError && <div className="text-red-500 mb-2">{searchError}</div>}
+                {searchSuccess && <div className="text-green-600 mb-2">{searchSuccess}</div>}
+            </div>
+
+            {/* Table Section - Flexible height */}
+            <div className="flex-1 min-h-0 mb-2">
+                {searchResult && (
+                    <div className="border border-blue-300 rounded-lg p-6 w-full max-w-lg mx-auto mb-6 bg-white shadow relative">
+                        <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl" onClick={handleCloseSearchResult} type="button">&times;</button>
+                        <form onSubmit={handleSearchEditSave}>
+                            <h2 className="text-xl font-bold mb-4">Edit Product</h2>
+                            <div className="grid grid-cols-2 gap-3 items-center">
+                                <label className="font-medium text-gray-700">Product Name:</label>
+                                <input name="productName" value={searchResult.productName || ''} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">Product Line:</label>
+                                <input name="productLine" value={typeof searchResult.productLine === 'object' ? (searchResult.productLine.productLine || searchResult.productLine.textDescription || '') : (searchResult.productLine || '')} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">Product Vendor:</label>
+                                <input name="productVendor" value={searchResult.productVendor || ''} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">Product Scale:</label>
+                                <input name="productScale" value={searchResult.productScale || ''} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">Buy Price:</label>
+                                <input name="buyPrice" value={searchResult.buyPrice || ''} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">MSRP:</label>
+                                <input name="msrp" value={searchResult.msrp || ''} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">Quantity In Stock:</label>
+                                <input name="quantityInStock" value={searchResult.quantityInStock || ''} onChange={handleSearchEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                
+                                <label className="font-medium text-gray-700">Description:</label>
+                                <textarea name="productDescription" value={searchResult.productDescription || ''} onChange={handleSearchEditInput} className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" />
+                            </div>
                         <div className="flex gap-2 mt-4">
                             <button type="submit" disabled={saving} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
                                 {saving ? 'Saving...' : 'Save Changes'}
@@ -312,25 +335,25 @@ const Products = () => {
                     </form>
                 </div>
             )}
-            {loading ? (
-                <p>Loading...</p>
-            ) : error ? (
-                <p className="text-red-500">{error}</p>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full border border-blue-300 text-sm">
-                        <thead className="bg-gray-100 border-b-2 border-[#258cbf]">
-                            <tr>
-                                <th className="px-2 py-1 text-center">Product Code</th>
-                                <th className="px-2 py-1 text-center">Product Name</th>
-                                <th className="px-2 py-1 text-center">Product Line</th>
-                                <th className="px-2 py-1 text-center">Product Vendor</th>
-                                <th className="px-2 py-1 text-center">Product Scale</th>
-                                <th className="px-2 py-1 text-center">Buy Price</th>
-                                <th className="px-2 py-1 text-center">MSRP</th>
-                                <th className="px-2 py-1 text-center">Quantity In Stock</th>
-                                <th className="px-2 py-1 text-center">Actions</th>
-                            </tr>
+                {loading ? (
+                    <div className="text-center py-4">Loading...</div>
+                ) : error ? (
+                    <div className="text-center text-red-500 py-4">{error}</div>
+                ) : (
+                    <div className="h-full overflow-auto">
+                        <table className="w-full border border-blue-300 text-sm">
+                            <thead className="bg-gray-100 border-b-2 border-[#258cbf] sticky top-0 z-10">
+                                <tr>
+                                    <th className="px-2 py-1 text-center">Product Code</th>
+                                    <th className="px-2 py-1 text-center">Product Name</th>
+                                    <th className="px-2 py-1 text-center">Product Line</th>
+                                    <th className="px-2 py-1 text-center">Product Vendor</th>
+                                    <th className="px-2 py-1 text-center">Product Scale</th>
+                                    <th className="px-2 py-1 text-center">Buy Price</th>
+                                    <th className="px-2 py-1 text-center">MSRP</th>
+                                    <th className="px-2 py-1 text-center">Quantity In Stock</th>
+                                    <th className="px-2 py-1 text-center sticky right-0 bg-gray-100 z-20">Actions</th>
+                                </tr>
                         </thead>
                         <tbody>
                             {products.map((product, idx) => (
@@ -347,16 +370,18 @@ const Products = () => {
                                     <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">{product.buyPrice}</td>
                                     <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">{product.msrp}</td>
                                     <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">{product.quantityInStock}</td>
-                                    <td className="border-t font-medium text-center border-[#42befb] px-2 py-1 flex flex-col gap-1 md:flex-row md:gap-2 justify-center items-center">
-                                        <button className="bg-[#4a90e2] text-white px-3 py-0.5 rounded hover:bg-blue-400 transition" onClick={() => handleView(product)}>
-                                            View
-                                        </button>
-                                        <button className="bg-yellow-500 text-white px-3 py-0.5 rounded hover:bg-yellow-600 transition" onClick={() => handleEdit(product)}>
-                                            Edit
-                                        </button>
-                                        <button className="bg-red-500 text-white px-3 py-0.5 rounded hover:bg-red-600 transition" onClick={() => handleDelete(product.productCode)}>
-                                            Delete
-                                        </button>
+                                    <td className="border-t font-medium text-center border-[#42befb] px-2 py-1 sticky right-0 bg-white z-10">
+                                        <div className="flex flex-col gap-1 md:flex-row md:gap-2 justify-center items-center">
+                                            <button className="bg-[#4a90e2] text-white px-3 py-0.5 rounded hover:bg-blue-400 transition" onClick={() => handleView(product)}>
+                                                View
+                                            </button>
+                                            <button className="bg-yellow-500 text-white px-3 py-0.5 rounded hover:bg-yellow-600 transition" onClick={() => handleEdit(product)}>
+                                                Edit
+                                            </button>
+                                            <button className="bg-red-500 text-white px-3 py-0.5 rounded hover:bg-red-600 transition" onClick={() => handleDelete(product.productCode)}>
+                                                Delete
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -364,6 +389,8 @@ const Products = () => {
                     </table>
                 </div>
             )}
+            </div>
+            
             {/* View Modal */}
             {viewProduct && (
                 <>
@@ -399,25 +426,30 @@ const Products = () => {
             <Modal open={showEdit} onClose={() => setShowEdit(false)}>
                 <form onSubmit={handleEditSave}>
                     <h2 className="text-xl font-bold mb-4">Edit Product</h2>
-                    <div className="grid grid-cols-1 gap-2">
-                        <div className="grid grid-cols-2 gap-2 items-center">
-                            <span className="font-semibold text-right pr-2">Product Name:</span>
-                            <input name="productName" value={editForm.productName || ''} onChange={handleEditInput} required placeholder="Product Name" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Line:</span>
-                            <input name="productLine" value={typeof editForm.productLine === 'object' ? (editForm.productLine.productLine || editForm.productLine.textDescription || '') : (editForm.productLine || '')} onChange={handleEditInput} required placeholder="Product Line" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Vendor:</span>
-                            <input name="productVendor" value={editForm.productVendor || ''} onChange={handleEditInput} required placeholder="Product Vendor" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Scale:</span>
-                            <input name="productScale" value={editForm.productScale || ''} onChange={handleEditInput} required placeholder="Product Scale" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Buy Price:</span>
-                            <input name="buyPrice" value={editForm.buyPrice || ''} onChange={handleEditInput} required placeholder="Buy Price" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">MSRP:</span>
-                            <input name="msrp" value={editForm.msrp || ''} onChange={handleEditInput} required placeholder="MSRP" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Quantity In Stock:</span>
-                            <input name="quantityInStock" value={editForm.quantityInStock || ''} onChange={handleEditInput} required placeholder="Quantity In Stock" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Description:</span>
-                            <textarea name="productDescription" value={editForm.productDescription || ''} onChange={handleEditInput} placeholder="Product Description" className="border p-2 rounded w-full" />
-                        </div>
+                    <div className="grid grid-cols-2 gap-3 items-center">
+                        <label className="font-medium text-gray-700">Product Name:</label>
+                        <input name="productName" value={editForm.productName || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Line:</label>
+                        <input name="productLine" value={typeof editForm.productLine === 'object' ? (editForm.productLine.productLine || editForm.productLine.textDescription || '') : (editForm.productLine || '')} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Vendor:</label>
+                        <input name="productVendor" value={editForm.productVendor || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Scale:</label>
+                        <input name="productScale" value={editForm.productScale || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Buy Price:</label>
+                        <input name="buyPrice" value={editForm.buyPrice || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">MSRP:</label>
+                        <input name="msrp" value={editForm.msrp || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Quantity In Stock:</label>
+                        <input name="quantityInStock" value={editForm.quantityInStock || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Description:</label>
+                        <textarea name="productDescription" value={editForm.productDescription || ''} onChange={handleEditInput} className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" />
                     </div>
                     <div className="flex gap-2 mt-4">
                         <button type="submit" disabled={saving} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
@@ -443,27 +475,33 @@ const Products = () => {
                 <form onSubmit={handleAddSave}>
                     <h2 className="text-xl font-bold mb-4">Add Product</h2>
                     {addError && <div className="text-red-500 mb-2">{addError}</div>}
-                    <div className="grid grid-cols-1 gap-2">
-                        <div className="grid grid-cols-2 gap-2 items-center">
-                            <span className="font-semibold text-right pr-2">Product Code:</span>
-                            <input name="productCode" value={addForm.productCode} onChange={handleAddInput} required placeholder="Product Code" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Name:</span>
-                            <input name="productName" value={addForm.productName} onChange={handleAddInput} required placeholder="Product Name" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Line:</span>
-                            <input name="productLine" value={addForm.productLine} onChange={handleAddInput} required placeholder="Product Line" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Vendor:</span>
-                            <input name="productVendor" value={addForm.productVendor} onChange={handleAddInput} required placeholder="Product Vendor" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Scale:</span>
-                            <input name="productScale" value={addForm.productScale} onChange={handleAddInput} required placeholder="Product Scale" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Buy Price:</span>
-                            <input name="buyPrice" value={addForm.buyPrice} onChange={handleAddInput} required placeholder="Buy Price" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">MSRP:</span>
-                            <input name="msrp" value={addForm.msrp} onChange={handleAddInput} required placeholder="MSRP" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Quantity In Stock:</span>
-                            <input name="quantityInStock" value={addForm.quantityInStock} onChange={handleAddInput} required placeholder="Quantity In Stock" className="border p-2 rounded w-full" />
-                            <span className="font-semibold text-right pr-2">Product Description:</span>
-                            <textarea name="productDescription" value={addForm.productDescription} onChange={handleAddInput} placeholder="Product Description" className="border p-2 rounded w-full" />
-                        </div>
+                    <div className="grid grid-cols-2 gap-3 items-center">
+                        <label className="font-medium text-gray-700">Product Code:</label>
+                        <input name="productCode" value={addForm.productCode} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Name:</label>
+                        <input name="productName" value={addForm.productName} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Line:</label>
+                        <input name="productLine" value={addForm.productLine} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Vendor:</label>
+                        <input name="productVendor" value={addForm.productVendor} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Product Scale:</label>
+                        <input name="productScale" value={addForm.productScale} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Buy Price:</label>
+                        <input name="buyPrice" value={addForm.buyPrice} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">MSRP:</label>
+                        <input name="msrp" value={addForm.msrp} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Quantity In Stock:</label>
+                        <input name="quantityInStock" value={addForm.quantityInStock} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Description:</label>
+                        <textarea name="productDescription" value={addForm.productDescription} onChange={handleAddInput} className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" />
                     </div>
                     <div className="flex gap-2 mt-4">
                         <button type="submit" disabled={addLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">

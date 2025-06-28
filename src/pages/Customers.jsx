@@ -1,36 +1,34 @@
 import ConfirmDialog from '../components/CustomerComponents/ConfirmDialog';
 import CustomerForm from '../components/CustomerComponents/CustomerForm';
-import CustomerSearch from '../components/CustomerComponents/CustomerSearch';
-import CustomerTable from '../components/CustomerComponents/CustomerTable';
-import Pagination from '../components/CustomerComponents/Pagination';
+import CustomerStats from '../components/CustomerComponents/CustomerStats';
+import EnhancedCustomerSearch from '../components/CustomerComponents/EnhancedCustomerSearch';
+import EnhancedCustomerTable from '../components/CustomerComponents/EnhancedCustomerTable';
 import Toast from '../components/CustomerComponents/Toast';
+import useAllCustomers from '../hooks/useAllCustomers';
+import useCustomerEnhancements from '../hooks/useCustomerEnhancements';
 import useCustomers from '../hooks/useCustomers';
 
 const Customers = () => {
+    // Get all customers for display and stats
+    const {
+        customers: allCustomers,
+        loading: customersLoading,
+        error: customersError,
+        refreshCustomers
+    } = useAllCustomers();
+
+    // Get form and modal functionality from the original hook
     const {
         // State
-        customers,
-        loading,
-        error,
         showAddForm,
         form,
         editMode,
         saving,
-        searchNumber,
         searchResult,
         searchError,
         searchEditMode,
         toast,
         confirmDialog,
-        visibleColumnStart,
-        columns,
-        columnsPerView,
-        
-        // Pagination state
-        currentPage,
-        totalPages,
-        totalCustomers,
-        itemsPerPage,
         
         // Actions
         handleInputChange,
@@ -41,19 +39,9 @@ const Customers = () => {
         cancelDelete,
         handleCloseForm,
         handleOpenForm,
-        handleSearch,
         handleSearchEditClick,
-        handleSearchInputChange,
         handleSearchSave,
         handleSearchClose,
-        setSearchNumber,
-        
-        // Pagination actions
-        handlePageChange,
-        handleNextPage,
-        handlePrevPage,
-        handleFirstPage,
-        handleLastPage,
         
         // Bulk selection
         selectedCustomers,
@@ -62,26 +50,42 @@ const Customers = () => {
         handleBulkDelete
     } = useCustomers();
 
+    // Enhanced features based on all customers
+    const {
+        sortBy,
+        filterCountry,
+        filterState,
+        showFilters,
+        globalSearch,
+        filteredCustomers,
+        countries,
+        states,
+        setSortBy,
+        setFilterCountry,
+        setFilterState,
+        setShowFilters,
+        setGlobalSearch
+    } = useCustomerEnhancements(allCustomers);
+
     return (
         <div className="max-w-6xl mx-auto px-2 h-full flex flex-col pt-2">
             {/* Header Section - Fixed height */}
-            <div className='flex items-start justify-start mb-3 flex-shrink-0'>
+            <div className='flex items-start justify-between mb-3 flex-shrink-0'>
                 <div className="flex flex-col">
                     <h1 className="text-2xl font-bold mb-1">Customers</h1>
                     <p className="text-gray-600 text-sm">Manage your customer database and information</p>
                 </div>
+                
+                {/* Quick Stats */}
+                <CustomerStats customers={allCustomers} />
             </div>
             
             {/* Search Section - Fixed height */}
             <div className="mb-3 flex-shrink-0">
-                <CustomerSearch
-                    searchNumber={searchNumber}
+                <EnhancedCustomerSearch
                     searchResult={searchResult}
                     searchError={searchError}
                     searchEditMode={searchEditMode}
-                    onSearchNumberChange={(e) => setSearchNumber(e.target.value)}
-                    onSearch={handleSearch}
-                    onSearchInputChange={handleSearchInputChange}
                     onSearchEditClick={handleSearchEditClick}
                     onSearchSave={handleSearchSave}
                     onSearchClose={handleSearchClose}
@@ -89,40 +93,35 @@ const Customers = () => {
                     onOpenForm={handleOpenForm}
                     selectedCustomers={selectedCustomers}
                     onBulkDelete={handleBulkDelete}
+                    // Enhanced props
+                    globalSearch={globalSearch}
+                    onGlobalSearchChange={setGlobalSearch}
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    showFilters={showFilters}
+                    onToggleFilters={setShowFilters}
+                    filterCountry={filterCountry}
+                    onFilterCountryChange={setFilterCountry}
+                    filterState={filterState}
+                    onFilterStateChange={setFilterState}
+                    countries={countries}
+                    states={states}
+                    filteredCount={filteredCustomers.length}
+                    totalCount={allCustomers.length}
                 />
             </div>
 
             {/* Table Section - Flexible height */}
             <div className="flex-1 min-h-0 mb-2">
-                <CustomerTable
-                    customers={customers}
-                    columns={columns}
-                    visibleColumnStart={visibleColumnStart}
-                    columnsPerView={columnsPerView}
-                    loading={loading}
-                    error={error}
+                <EnhancedCustomerTable
+                    customers={filteredCustomers}
+                    loading={customersLoading}
+                    error={customersError}
                     onEditClick={handleEditClick}
                     onDeleteClick={handleDeleteClick}
-                    currentPage={currentPage}
-                    itemsPerPage={itemsPerPage}
                     selectedCustomers={selectedCustomers}
                     onSelectCustomer={handleSelectCustomer}
                     onSelectAllCustomers={handleSelectAllCustomers}
-                />
-            </div>
-
-            {/* Pagination Section - Fixed height */}
-            <div className="flex-shrink-0">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalCustomers={totalCustomers}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={handlePageChange}
-                    onNextPage={handleNextPage}
-                    onPrevPage={handlePrevPage}
-                    onFirstPage={handleFirstPage}
-                    onLastPage={handleLastPage}
                 />
             </div>
 
@@ -132,7 +131,11 @@ const Customers = () => {
                 editMode={editMode}
                 saving={saving}
                 onInputChange={handleInputChange}
-                onSubmit={handleAddCustomer}
+                onSubmit={(e) => {
+                    handleAddCustomer(e).then(() => {
+                        refreshCustomers();
+                    });
+                }}
                 onClose={handleCloseForm}
             />
 

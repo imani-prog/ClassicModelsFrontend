@@ -72,6 +72,8 @@ const CustomerTable = ({
                                         <td key={col.key} className="border-t-2 font-medium text-center border-[#42befb] px-2 py-2 whitespace-nowrap">
                                             {col.key === 'salesRepEmployeeNumber'
                                                 ? (customer.salesRepEmployeeNumber ? customer.salesRepEmployeeNumber.employeeNumber : '')
+                                                : col.key === 'creditLimit'
+                                                ? `Ksh ${parseFloat(customer[col.key] || 0).toLocaleString()}`
                                                 : customer[col.key]
                                             }
                                         </td>

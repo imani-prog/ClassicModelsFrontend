@@ -1,24 +1,16 @@
 import { useEffect, useState } from 'react';
-import { FaPlus } from 'react-icons/fa';
+import { FaCalendarAlt, FaDollarSign, FaEdit, FaFilter, FaList, FaPlus, FaTh, FaTrash, FaUsers } from 'react-icons/fa';
+import { IoSearch } from 'react-icons/io5';
 
-function Modal({ open, onClose, children, wide = false }) {
+function Modal({ open, onClose, children }) {
     if (!open) return null;
     return (
-        <>
-            <div className="fixed inset-0 z-40  bg-opacity-30" style={{ left: '220px', pointerEvents: 'auto' }}></div>
-            <div className="fixed inset-0 flex items-center justify-center z-50">
-                <div
-                    className={
-                        wide
-                            ? "bg-white border border-blue-300 rounded-lg p-6 w-full max-w-[98vw] md:max-w-[900px] lg:max-w-[1100px] xl:max-w-[1300px] 2xl:max-w-[1500px] shadow-md relative"
-                            : "bg-white border border-blue-300 rounded-lg p-6 w-full max-w-md shadow-md relative"
-                    }
-                >
-                    <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl" onClick={onClose} type="button">&times;</button>
-                    {children}
-                </div>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white border border-blue-300 rounded-lg p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto">
+                <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl" onClick={onClose} type="button">&times;</button>
+                {children}
             </div>
-        </>
+        </div>
     );
 }
 
@@ -26,15 +18,32 @@ function Modal({ open, onClose, children, wide = false }) {
 const formatDate = (d) => {
     if (!d) return '';
     
-    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    // Helper function to format dates as DD/MM/YYYY
+    const formatDisplayDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date)) return '';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
 
+    // If already in YYYY-MM-DD format, convert to DD/MM/YYYY
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+        return formatDisplayDate(d);
+    }
+
+    // If it's an 8-digit number (YYYYMMDD), convert to DD/MM/YYYY
     if (/^\d{8}$/.test(String(d))) {
         const s = String(d);
-        return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+        const isoDate = `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+        return formatDisplayDate(isoDate);
     }
     
+    // Try to parse as date and format as DD/MM/YYYY
     const dateObj = new Date(d);
-    if (!isNaN(dateObj)) return dateObj.toLocaleDateString();
+    if (!isNaN(dateObj)) return formatDisplayDate(dateObj);
     return d;
 };
 
@@ -53,13 +62,16 @@ const Payments = () => {
     const [addLoading, setAddLoading] = useState(false);
     const [addError, setAddError] = useState('');
     const [addSuccess, setAddSuccess] = useState('');
-    const [searchCustomerId, setSearchCustomerId] = useState('');
-    const [searchCheckNo, setSearchCheckNo] = useState('');
-    const [searchResult, setSearchResult] = useState(null);
-    const [searchError, setSearchError] = useState('');
-    const [searchLoading, setSearchLoading] = useState(false);
-    const [showSearchModal, setShowSearchModal] = useState(false);
-    const [searchCustomerDetails, setSearchCustomerDetails] = useState({});
+
+    // New state for enhanced features
+    const [viewMode, setViewMode] = useState('table'); // 'cards' or 'table'
+    const [sortBy, setSortBy] = useState('customerId'); // 'customerId', 'amount', 'date'
+    const [filterAmountMin, setFilterAmountMin] = useState('');
+    const [filterAmountMax, setFilterAmountMax] = useState('');
+    const [filterDateFrom, setFilterDateFrom] = useState('');
+    const [filterDateTo, setFilterDateTo] = useState('');
+    const [showFilters, setShowFilters] = useState(false);
+    const [globalSearch, setGlobalSearch] = useState('');
 
     useEffect(() => {
         fetch('http://localhost:8081/payments')
@@ -80,6 +92,97 @@ const Payments = () => {
                 console.error("Error fetching payments:", err);
             });
     }, []);
+
+    // Enhanced filtering and sorting logic
+    const filteredPayments = payments
+        .filter(payment => {
+            // Global search filter
+            const searchMatch = !globalSearch || 
+                String(payment.customerId).toLowerCase().includes(globalSearch.toLowerCase()) ||
+                String(payment.checkNo).toLowerCase().includes(globalSearch.toLowerCase()) ||
+                String(payment.amount).includes(globalSearch) ||
+                formatDate(payment.date).toLowerCase().includes(globalSearch.toLowerCase());
+            
+            // Amount range filter
+            const amountMatch = (!filterAmountMin || parseFloat(payment.amount) >= parseFloat(filterAmountMin)) &&
+                               (!filterAmountMax || parseFloat(payment.amount) <= parseFloat(filterAmountMax));
+            
+            // Date range filter
+            let dateMatch = true;
+            if (filterDateFrom || filterDateTo) {
+                const paymentDate = new Date(payment.date);
+                if (filterDateFrom) {
+                    const fromDate = new Date(filterDateFrom);
+                    dateMatch = dateMatch && paymentDate >= fromDate;
+                }
+                if (filterDateTo) {
+                    const toDate = new Date(filterDateTo);
+                    dateMatch = dateMatch && paymentDate <= toDate;
+                }
+            }
+            
+            return searchMatch && amountMatch && dateMatch;
+        })
+        .sort((a, b) => {
+            switch (sortBy) {
+                case 'customerId':
+                    return String(a.customerId).localeCompare(String(b.customerId));
+                case 'amount':
+                    return parseFloat(b.amount) - parseFloat(a.amount); // High to low
+                case 'date':
+                    return new Date(b.date) - new Date(a.date); // Most recent first
+                default:
+                    return 0;
+            }
+        });
+
+    // Calculate statistics
+    const totalPayments = payments.length;
+    const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount || 0), 0);
+    const uniqueCustomers = [...new Set(payments.map(payment => payment.customerId))].length;
+
+    // Helper function to render payment card
+    const renderPaymentCard = (payment, idx) => {
+        return (
+            <div key={`${payment.customerId}-${payment.checkNo}-${idx}`} className="bg-white border-2 border-[#42befb] rounded-lg p-4 hover:shadow-lg transition-shadow">
+                <div className="flex flex-col h-full">
+                    <h2 className="text-xl font-bold text-center mb-3 text-blue-700">Payment #{payment.checkNo}</h2>
+                    <div className="flex-1 space-y-2">
+                        <div className="grid grid-cols-3 gap-1 text-sm">
+                            <span className="font-medium text-gray-600">Customer ID:</span>
+                            <span className="col-span-2 font-semibold">{payment.customerId}</span>
+                            
+                            <span className="font-medium text-gray-600">Check No:</span>
+                            <span className="col-span-2 font-semibold">{payment.checkNo}</span>
+                            
+                            <span className="font-medium text-gray-600">Amount:</span>
+                            <span className="col-span-2 font-semibold text-green-600">Kshs {payment.amount}</span>
+                            
+                            <span className="font-medium text-gray-600">Date:</span>
+                            <span className="col-span-2 font-semibold">{formatDate(payment.date)}</span>
+                        </div>
+                    </div>
+                    <div className="flex justify-center gap-3 mt-4 pt-3 border-t">
+                        <button
+                            onClick={() => handleEditClick(payment)}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded flex items-center gap-1 transition"
+                        >
+                            <FaEdit className="w-3 h-3" />
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => handleDelete(payment.customerId, payment.checkNo)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 transition"
+                            disabled={deleteLoading}
+                        >
+                            <FaTrash className="w-3 h-3" />
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     // Edit button handler
     const handleEditClick = (payment) => {
@@ -157,186 +260,267 @@ const Payments = () => {
             .finally(() => setDeleteLoading(false));
     };
 
-    const fetchCustomerDetails = async (customerNumber) => {
-        if (!customerNumber) return null;
-        // Avoid duplicate fetches
-        if (searchCustomerDetails[customerNumber]) return searchCustomerDetails[customerNumber];
-        try {
-            const res = await fetch(`http://localhost:8081/customers/${customerNumber}`);
-            if (!res.ok) throw new Error('Failed to fetch customer');
-            const data = await res.json();
-            setSearchCustomerDetails(prev => ({ ...prev, [customerNumber]: data }));
-            return data;
-        } catch {
-            return null;
-        }
-    };
-
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className='items-center justify-center w-full flex flex-col mb-6'>
-                <h1 className="text-3xl font-bold text-center mb-6">Payments</h1>
-                <button className="bg-[#4a90e2] flex flex-row gap-2 items-center cursor-pointer text-white px-8 py-1.5 
-                           rounded hover:bg-blue-400 transition" onClick={() => { setAddModalOpen(true); setAddError(''); setAddSuccess(''); setAddForm({ customerId: '', checkNo: '', amount: '', date: '' }); }}>
-                    <FaPlus className='text-black text-lg' />
-                    Add Payment
-                </button>
+        <div className="max-w-6xl mx-auto px-2 h-full flex flex-col pt-2">
+            {/* Global Success/Error Messages */}
+            {deleteSuccess && <div className="text-green-600 mb-2 text-center font-semibold">{deleteSuccess}</div>}
+            {deleteError && <div className="text-red-500 mb-2 text-center font-semibold">{deleteError}</div>}
+            
+            {/* Header Section - Fixed height */}
+            <div className='flex items-start justify-between mb-3 flex-shrink-0'>
+                <div className="flex flex-col">
+                    <h1 className="text-2xl font-bold mb-1">Payments</h1>
+                    <p className="text-gray-600 text-sm">Manage customer payments and transactions</p>
+                </div>
+                
+                {/* Quick Stats */}
+                <div className="flex gap-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-center">
+                        <div className="flex items-center gap-2 text-blue-600">
+                            <FaDollarSign className="text-lg" />
+                            <div>
+                                <div className="text-xl font-bold">{totalPayments}</div>
+                                <div className="text-xs">Total Payments</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-center">
+                        <div className="flex items-center gap-2 text-green-600">
+                            <FaCalendarAlt className="text-lg" />
+                            <div>
+                                <div className="text-xl font-bold">Kshs {totalAmount.toLocaleString()}</div>
+                                <div className="text-xs">Total Amount</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg px-4 py-2 text-center">
+                        <div className="flex items-center gap-2 text-purple-600">
+                            <FaUsers className="text-lg" />
+                            <div>
+                                <div className="text-xl font-bold">{uniqueCustomers}</div>
+                                <div className="text-xs">Unique Customers</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="flex items-center justify-between mb-4">
-                <form className="flex gap-2 items-center" onSubmit={e => {
-                    e.preventDefault();
-                    setSearchError('');
-                    setSearchResult(null);
-                    if (!searchCustomerId.trim() && !searchCheckNo.trim()) {
-                        setSearchError('Enter Customer ID or Check No');
-                        return;
-                    }
-                    setSearchLoading(true);
-                    if (searchCustomerId.trim() && searchCheckNo.trim()) {
-                        // Search by both (exact match)
-                        fetch(`http://localhost:8081/payments/${searchCustomerId.trim()}/${searchCheckNo.trim()}`)
-                            .then(res => {
-                                if (!res.ok) throw new Error('Payment not found');
-                                return res.json();
-                            })
-                            .then(data => {
-                                const results = Array.isArray(data)
-                                    ? data.map(payment => ({
-                                        customerId: payment.id.customerNumber,
-                                        checkNo: payment.id.checkNumber,
-                                        amount: payment.amount,
-                                        date: payment.paymentDate
-                                    }))
-                                    : [{
-                                        customerId: data.id.customerNumber,
-                                        checkNo: data.id.checkNumber,
-                                        amount: data.amount,
-                                        date: data.paymentDate
-                                    }];
-                                setSearchResult(results);
-                                // Fetch customer info for all unique customerNumbers
-                                const uniqueCustomers = [...new Set(results.map(r => r.customerId))];
-                                uniqueCustomers.forEach(cn => fetchCustomerDetails(cn));
-                                setShowSearchModal(true);
-                            })
-                            .catch(err => setSearchError(err.message))
-                            .finally(() => setSearchLoading(false));
-                    } else if (searchCustomerId.trim()) {
-                        // Filter all payments by customerId
-                        fetch('http://localhost:8081/payments')
-                            .then(res => {
-                                if (!res.ok) throw new Error('Failed to fetch payments');
-                                return res.json();
-                            })
-                            .then(data => {
-                                const matches = data.filter(p => String(p.id.customerNumber) === searchCustomerId.trim())
-                                    .map(payment => ({
-                                        customerId: payment.id.customerNumber,
-                                        checkNo: payment.id.checkNumber,
-                                        amount: payment.amount,
-                                        date: payment.paymentDate
-                                    }));
-                                if (matches.length === 0) throw new Error('No payments found for this Customer ID');
-                                setSearchResult(matches);
-                                // Fetch customer info for all unique customerNumbers
-                                const uniqueCustomers = [...new Set(matches.map(m => m.customerId))];
-                                uniqueCustomers.forEach(cn => fetchCustomerDetails(cn));
-                                setShowSearchModal(true);
-                            })
-                            .catch(err => setSearchError(err.message))
-                            .finally(() => setSearchLoading(false));
-                    } else if (searchCheckNo.trim()) {
-                        // Filter all payments by checkNo
-                        fetch('http://localhost:8081/payments')
-                            .then(res => {
-                                if (!res.ok) throw new Error('Failed to fetch payments');
-                                return res.json();
-                            })
-                            .then(data => {
-                                const matches = data.filter(p => String(p.id.checkNumber) === searchCheckNo.trim())
-                                    .map(payment => ({
-                                        customerId: payment.id.customerNumber,
-                                        checkNo: payment.id.checkNumber,
-                                        amount: payment.amount,
-                                        date: payment.paymentDate
-                                    }));
-                                if (matches.length === 0) throw new Error('No payments found for this Check No');
-                                setSearchResult(matches);
-                                // Fetch customer info for all unique customerNumbers
-                                const uniqueCustomers = [...new Set(matches.map(m => m.customerId))];
-                                uniqueCustomers.forEach(cn => fetchCustomerDetails(cn));
-                                setShowSearchModal(true);
-                            })
-                            .catch(err => setSearchError(err.message))
-                            .finally(() => setSearchLoading(false));
-                    }
-                }}>
-                    <input
-                        type="text"
-                        placeholder="Customer ID"
-                        value={searchCustomerId}
-                        onChange={e => setSearchCustomerId(e.target.value)}
-                        className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-3 pr-2 w-32"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Check No"
-                        value={searchCheckNo}
-                        onChange={e => setSearchCheckNo(e.target.value)}
-                        className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-3 pr-2 w-32"
-                    />
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-                        disabled={searchLoading}
-                    >
-                        {searchLoading ? 'Searching...' : 'Search'}
-                    </button>
-                </form>
-                {searchError && <div className="text-red-500 ml-4">{searchError}</div>}
+            
+            {/* Search Section - Fixed height */}
+            <div className="mb-3 flex-shrink-0">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-4">
+                        {/* Global Search Input */}
+                        <div className="relative flex items-center">
+                            <input
+                                type="text"
+                                placeholder="Search payments (Customer ID, Check No, Amount, Date)"
+                                value={globalSearch}
+                                onChange={e => setGlobalSearch(e.target.value)}
+                                className="border-2 border-black bg-[#f5f5f5] rounded-md py-2 pl-10 pr-4 w-80"
+                            />
+                            <IoSearch className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                        </div>
+
+                        {/* Filter Toggle */}
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`flex items-center gap-2 px-3 py-2 rounded border-2 transition ${
+                                showFilters 
+                                    ? 'bg-blue-100 border-blue-300 text-blue-700' 
+                                    : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            type="button"
+                            title="Toggle Filters"
+                        >
+                            <FaFilter className="w-4 h-4" />
+                            Filters
+                        </button>
+
+                        {/* Sort Dropdown */}
+                        <select
+                            value={sortBy}
+                            onChange={e => setSortBy(e.target.value)}
+                            className="border-2 border-gray-300 bg-gray-100 rounded-md py-2 px-3 text-gray-700"
+                            title="Sort By"
+                        >
+                            <option value="customerId">Sort by Customer ID</option>
+                            <option value="amount">Sort by Amount (High to Low)</option>
+                            <option value="date">Sort by Date (Recent First)</option>
+                        </select>
+
+                        {/* View Mode Toggle */}
+                        <div className="flex items-center border-2 border-gray-300 rounded-md bg-gray-100">
+                            <button
+                                onClick={() => setViewMode('cards')}
+                                className={`p-2 transition ${viewMode === 'cards' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+                                type="button"
+                                title="Card View"
+                            >
+                                <FaTh className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('table')}
+                                className={`p-2 transition ${viewMode === 'table' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-200'}`}
+                                type="button"
+                                title="Table View"
+                            >
+                                <FaList className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => { 
+                                setAddModalOpen(true); 
+                                setAddError(''); 
+                                setAddSuccess(''); 
+                                setAddForm({ customerId: '', checkNo: '', amount: '', date: '' }); 
+                            }}
+                            className="bg-[#4a90e2] items-center flex flex-row gap-2 cursor-pointer text-white px-6 py-2 rounded hover:bg-blue-400 transition"
+                        >
+                            <FaPlus className='text-black text-lg' />
+                            Add Payment
+                        </button>
+                    </div>
+                </div>
+
+                {/* Collapsible Filters */}
+                {showFilters && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Amount Range
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="number"
+                                        placeholder="Min"
+                                        value={filterAmountMin}
+                                        onChange={e => setFilterAmountMin(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md py-2 px-3 bg-white"
+                                        step="0.01"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Max"
+                                        value={filterAmountMax}
+                                        onChange={e => setFilterAmountMax(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md py-2 px-3 bg-white"
+                                        step="0.01"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Date Range
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="date"
+                                        value={filterDateFrom}
+                                        onChange={e => setFilterDateFrom(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md py-2 px-3 bg-white"
+                                    />
+                                    <input
+                                        type="date"
+                                        value={filterDateTo}
+                                        onChange={e => setFilterDateTo(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-md py-2 px-3 bg-white"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Results Counter */}
+                {filteredPayments.length > 0 && (
+                    <div className="text-sm text-gray-600 mb-2">
+                        Showing {filteredPayments.length} of {payments.length} payments
+                        {(globalSearch || filterAmountMin || filterAmountMax || filterDateFrom || filterDateTo) && (
+                            <span className="ml-2 text-blue-600">
+                                (filtered)
+                            </span>
+                        )}
+                    </div>
+                )}
             </div>
-            {deleteError && <div className="text-red-500 mb-2">{deleteError}</div>}
-            {deleteSuccess && <div className="text-green-600 mb-2">{deleteSuccess}</div>}
-            <table className="w-full border overflow-x-scroll border-blue-300">
-                <thead className="bg-[#f5f5f5] border-b-2 border-[#258cbf]">
-                    <tr>
-                        <th className="px-4 py-2 text-center whitespace-nowrap">Customer ID</th>
-                        <th className="px-4 py-2 text-center whitespace-nowrap">Check No</th>
-                        <th className="px-4 py-2 text-center whitespace-nowrap">Amount</th>
-                        <th className="px-4 py-2 text-center whitespace-nowrap">Date</th>
-                        <th className="px-4 py-2 text-center whitespace-nowrap">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {payments.map((payment, idx) => (
-                        <tr key={idx} className="hover:bg-gray-50">
-                            <td className="border-t-2 font-medium text-center border-[#42befb] px-4 py-2 whitespace-nowrap">{payment.customerId}</td>
-                            <td className="border-t-2 font-medium text-center border-[#42befb] px-4 py-2 whitespace-nowrap">{payment.checkNo}</td>
-                            <td className="border-t-2 font-medium text-center border-[#42befb] px-4 py-2 whitespace-nowrap">Kshs {payment.amount}</td>
-                            <td className="border-t-2 font-medium text-center border-[#42befb] px-4 py-2 whitespace-nowrap">{formatDate(payment.date)}</td>
-                            <td className="border-t-2 font-medium text-center border-[#42befb] px-4 py-2 whitespace-nowrap">
-                                <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded mr-2" onClick={() => handleEditClick(payment)}>Edit</button>
-                                <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleDelete(payment.customerId, payment.checkNo)} disabled={deleteLoading}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
+            {/* Content Section - Flexible height */}
+            <div className="flex-1 min-h-0 mb-2">
+                {filteredPayments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <FaDollarSign className="text-6xl mb-4 text-gray-300" />
+                        <h3 className="text-xl font-semibold mb-2">No payments found</h3>
+                        <p className="text-center">
+                            {payments.length === 0 
+                                ? "No payments have been added yet. Click 'Add Payment' to create your first payment record."
+                                : "No payments match your current filters. Try adjusting your search criteria or filters."
+                            }
+                        </p>
+                    </div>
+                ) : viewMode === 'cards' ? (
+                    <div className="h-full overflow-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-2">
+                            {filteredPayments.map((payment, idx) => renderPaymentCard(payment, idx))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="h-full overflow-auto">
+                        <table className="w-full border border-blue-300 text-sm">
+                            <thead className="bg-gray-100 border-b-2 border-[#258cbf] sticky top-0 z-10">
+                                <tr>
+                                    <th className="px-2 py-1 text-center">Customer ID</th>
+                                    <th className="px-2 py-1 text-center">Check No</th>
+                                    <th className="px-2 py-1 text-center">Amount</th>
+                                    <th className="px-2 py-1 text-center">Date</th>
+                                    <th className="px-2 py-1 text-center sticky right-0 bg-gray-100">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredPayments.map((payment, idx) => (
+                                    <tr key={`${payment.customerId}-${payment.checkNo}-${idx}`} className="hover:bg-gray-50">
+                                        <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">{payment.customerId}</td>
+                                        <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">{payment.checkNo}</td>
+                                        <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">Kshs {payment.amount}</td>
+                                        <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">{formatDate(payment.date)}</td>
+                                        <td className="border-t font-medium text-center border-[#42befb] px-2 py-1 sticky right-0 bg-white">
+                                            <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded mr-2" onClick={() => handleEditClick(payment)}>
+                                                <FaEdit className="w-3 h-3 inline mr-1" />
+                                                Edit
+                                            </button>
+                                            <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleDelete(payment.customerId, payment.checkNo)} disabled={deleteLoading}>
+                                                <FaTrash className="w-3 h-3 inline mr-1" />
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
             <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
                 {editPayment && (
                     <form onSubmit={handleEditSave}>
                         <h2 className="text-xl font-bold mb-4">Edit Payment</h2>
                         {editError && <div className="text-red-500 mb-2">{editError}</div>}
                         {editSuccess && <div className="text-green-600 mb-2">{editSuccess}</div>}
-                        <div className="grid grid-cols-2 gap-2 items-center">
-                            <span className="font-semibold text-right pr-2">Customer ID:</span>
-                            <input name="customerId" value={editPayment.customerId} onChange={handleEditInput} required className="border p-2 rounded w-full" readOnly />
-                            <span className="font-semibold text-right pr-2">Check No:</span>
-                            <input name="checkNo" value={editPayment.checkNo} onChange={handleEditInput} required className="border p-2 rounded w-full" readOnly />
-                            <span className="font-semibold text-right pr-2">Amount:</span>
-                            <input name="amount" value={editPayment.amount} onChange={handleEditInput} required className="border p-2 rounded w-full" type="number" step="0.01" />
-                            <span className="font-semibold text-right pr-2">Date:</span>
-                            <input name="date" value={editPayment.date} onChange={handleEditInput} required className="border p-2 rounded w-full" placeholder="Date (YYYY-MM-DD)" type="date" />
+                        <div className="grid grid-cols-2 gap-3 items-center">
+                            <label className="font-medium text-gray-700">Customer ID:</label>
+                            <input name="customerId" value={editPayment.customerId} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" readOnly />
+                            
+                            <label className="font-medium text-gray-700">Check No:</label>
+                            <input name="checkNo" value={editPayment.checkNo} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" readOnly />
+                            
+                            <label className="font-medium text-gray-700">Amount:</label>
+                            <input name="amount" value={editPayment.amount} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" type="number" step="0.01" />
+                            
+                            <label className="font-medium text-gray-700">Date:</label>
+                            <input name="date" value={editPayment.date} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" type="date" />
                         </div>
                         <div className="flex gap-2 mt-4">
                             <button type="submit" disabled={editLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
@@ -392,15 +576,18 @@ const Payments = () => {
                     <h2 className="text-xl font-bold mb-4">Add Payment</h2>
                     {addError && <div className="text-red-500 mb-2">{addError}</div>}
                     {addSuccess && <div className="text-green-600 mb-2">{addSuccess}</div>}
-                    <div className="grid grid-cols-2 gap-2 items-center">
-                        <span className="font-semibold text-right pr-2">Customer ID:</span>
-                        <input name="customerId" value={addForm.customerId} onChange={e => setAddForm(f => ({ ...f, customerId: e.target.value }))} required className="border p-2 rounded w-full" />
-                        <span className="font-semibold text-right pr-2">Check No:</span>
-                        <input name="checkNo" value={addForm.checkNo} onChange={e => setAddForm(f => ({ ...f, checkNo: e.target.value }))} required className="border p-2 rounded w-full" />
-                        <span className="font-semibold text-right pr-2">Amount:</span>
-                        <input name="amount" value={addForm.amount} onChange={e => setAddForm(f => ({ ...f, amount: e.target.value }))} required className="border p-2 rounded w-full" type="number" step="0.01" />
-                        <span className="font-semibold text-right pr-2">Date:</span>
-                        <input name="date" value={addForm.date} onChange={e => setAddForm(f => ({ ...f, date: e.target.value }))} required className="border p-2 rounded w-full" placeholder="Date (YYYY-MM-DD)" type="date" />
+                    <div className="grid grid-cols-2 gap-3 items-center">
+                        <label className="font-medium text-gray-700">Customer ID:</label>
+                        <input name="customerId" value={addForm.customerId} onChange={e => setAddForm(f => ({ ...f, customerId: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Check No:</label>
+                        <input name="checkNo" value={addForm.checkNo} onChange={e => setAddForm(f => ({ ...f, checkNo: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        
+                        <label className="font-medium text-gray-700">Amount:</label>
+                        <input name="amount" value={addForm.amount} onChange={e => setAddForm(f => ({ ...f, amount: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" type="number" step="0.01" />
+                        
+                        <label className="font-medium text-gray-700">Date:</label>
+                        <input name="date" value={addForm.date} onChange={e => setAddForm(f => ({ ...f, date: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" type="date" />
                     </div>
                     <div className="flex gap-2 mt-4">
                         <button type="submit" disabled={addLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
@@ -409,57 +596,6 @@ const Payments = () => {
                         <button type="button" onClick={() => setAddModalOpen(false)} className="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400 transition">Close</button>
                     </div>
                 </form>
-            </Modal>
-            <Modal open={showSearchModal} onClose={() => setShowSearchModal(false)}>
-                {searchResult && Array.isArray(searchResult) && searchResult.length > 0 ? (
-                    <div className="w-full flex flex-col items-center justify-center">
-                        <h2 className="text-2xl font-bold mb-4 text-center">Payment Details</h2>
-                        <div className="rounded border border-blue-200 bg-white w-full max-w-sm mx-auto p-4 flex flex-col items-center justify-center" style={{ maxHeight: '500px', minWidth: '340px' }}>
-                            {searchResult.map((result, idx) => {
-                                const cust = searchCustomerDetails[result.customerId] || {};
-                                return (
-                                    <div key={idx} className="w-full flex flex-col gap-2 mb-4 last:mb-0 border-b last:border-b-0 border-blue-100 pb-4 last:pb-0">
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Customer Name:</span>
-                                            <span className="w-1/2 text-left break-words">{cust.customerName || '-'}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Customer Number</span>
-                                            <span className="w-1/2 text-left break-words">{result.customerId}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Contact 1st Name</span>
-                                            <span className="w-1/2 text-left break-words">{cust.contactFirstName || '-'}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Contact 2nd Name</span>
-                                            <span className="w-1/2 text-left break-words">{cust.contactLastName || '-'}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Phone Number:</span>
-                                            <span className="w-1/2 text-left break-words">{cust.phone || '-'}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Check No:</span>
-                                            <span className="w-1/2 text-left break-words">{result.checkNo}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Amount:</span>
-                                            <span className="w-1/2 text-left break-words">Kshs {result.amount}</span>
-                                        </div>
-                                        <div className="flex flex-row w-full">
-                                            <span className="font-semibold w-1/2 text-right pr-3">Date:</span>
-                                            <span className="w-1/2 text-left break-words">{formatDate(result.date)}</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className="flex gap-4 mt-6 justify-center">
-                            <button type="button" onClick={() => setShowSearchModal(false)} className="bg-gray-300 text-black px-6 py-2 rounded hover:bg-gray-400 transition text-lg">Close</button>
-                        </div>
-                    </div>
-                ) : null}
             </Modal>
         </div>
     );
