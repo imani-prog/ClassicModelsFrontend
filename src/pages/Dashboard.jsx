@@ -49,21 +49,8 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
         <div className="items-center justify-center min-h-screen w-full p-4">
             <div className="flex justify-between items-center relative">
                 <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
-                <div className="relative">
-                    <FaBell className="text-2xl text-gray-600 cursor-pointer" onClick={() => setShowDropdown(!showDropdown)} />
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                        {notifications.length}
-                    </span>
-                    {showDropdown && (
-                        <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded p-4 z-10">
-                            {notifications.map((note, i) => (
-                                <p key={i} className="text-sm text-gray-700 mb-2 border-b pb-1">{note}</p>
-                            ))}
-                        </div>
-                    )}
-                </div>
             </div>
-            <p className="text-left text-lg mt-4">Welcome back Tim <span role="img" aria-label="smile">😊</span>,</p>
+            <p className="text-left text-lg mt-4">Welcome back Tim <span role="img" aria-label="smile">😊</span></p>
 
             {loading ? (
                 <div className="text-center py-10">Loading dashboard...</div>
@@ -161,16 +148,15 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                             <Bar dataKey="orders" fill="#4a90e2" />
                         </BarChart>
                     </div>
-                     {/* <TopPayments />
-                     <TopProducts /> */}
-<div className="mt-6 flex flex-col lg:flex-row lg:space-x-6 w-full">
-  <div className="flex-1">
-    <TopPayments />
-  </div>
-  <div className="flex-1">
-    <TopProducts />
-  </div>
-</div>
+
+                <div className="mt-6 flex flex-col lg:flex-row lg:space-x-6 w-full">
+                    <div className="flex-1">
+                        <TopPayments />
+                    </div>
+                <div className="flex-1">
+                    <TopProducts />
+                </div>
+            </div>
 
 
 
@@ -193,6 +179,10 @@ const Dashboard = ({ isOpen, setIsOpen, darkMode, setDarkMode }) => {
                 </div>
                 </>
             )}
+
+        <div>
+            <h1 classNam="text-4xl font-bold text-gray-800">Kesho bana 😂😂😂🐪😎 5:40am</h1>
+        </div>
         </div>
     );
 };

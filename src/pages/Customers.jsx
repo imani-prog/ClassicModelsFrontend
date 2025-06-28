@@ -131,7 +131,9 @@ const Customers = () => {
         const payload = {
             ...form,
             creditLimit: form.creditLimit ? parseFloat(form.creditLimit) : null,
-            salesRepEmployeeNumber: form.salesRepEmployeeNumber ? { id: parseInt(form.salesRepEmployeeNumber) } : null
+            salesRepEmployeeNumber: form.salesRepEmployeeNumber
+                ? { employeeNumber: parseInt(form.salesRepEmployeeNumber) }
+                : null
         };
         let url = 'http://localhost:8081/customers/save';
         let method = 'POST';
@@ -363,32 +365,32 @@ const Customers = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {customers.map((customer, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50">
-                                        {columns.slice(visibleColumnStart, visibleColumnStart + columnsPerView).map((col) => (
-                                            <td key={col.key} className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{
-                                                col.key === 'salesRepEmployeeNumber'
-                                                    ? (customer.salesRepEmployeeNumber ? customer.salesRepEmployeeNumber.id : '')
-                                                    : customer[col.key]
-                                            }</td>
+                                    {customers.map((customer) => (
+                                            <tr key={customer.id || customer.customerNumber} className="hover:bg-gray-50">
+                                                {columns.slice(visibleColumnStart, visibleColumnStart + columnsPerView).map((col) => (
+                                                    <td key={col.key} className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap">{
+                                                        col.key === 'salesRepEmployeeNumber'
+                                                            ? (customer.salesRepEmployeeNumber ? customer.salesRepEmployeeNumber.employeeNumber : '')
+                                                                : customer[col.key]
+                                                    }</td>
+                                                ))}
+                                                <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap sticky right-0 bg-white z-10">
+                                                    <button
+                                                        className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                                                        onClick={() => handleEditClick(customer)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                                                        onClick={() => handleDeleteClick(customer.id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
                                         ))}
-                                        <td className="border-t-2 font-medium text-center border-[#42befb] px-2 py-1 whitespace-nowrap sticky right-0 bg-white z-10">
-                                            <button
-                                                className="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                                onClick={() => handleEditClick(customer)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                                                onClick={() => handleDeleteClick(customer.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
+                                    </tbody>
                         </table>
                     </div>
                 </div>

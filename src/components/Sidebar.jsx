@@ -24,7 +24,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="fixed top-0 left-0 h-full w-60 bg-[#1a2f43] text-white shadow-lg transition-all duration-300">
+    <aside className="fixed top-0 left-0 h-full w-60 bg-[#1a2f43] text-white shadow-lg transition-all duration-300 ">
       {/* Header */}
       <div className="flex items-left justify-left px-4 py-3 border-b border-gray-700">
         <h1 className="text-lg text-left font-bold text-[#4a90e2]">Classic<span className="text-white">Models</span></h1>

@@ -254,7 +254,7 @@ const Products = () => {
     }, [addSuccess]);
 
     return (
-        <div className="max-w-7xl mx-auto px-2 py-6 mt-0 pt-0">
+        <div className="max-w-7xl mx-auto px-2 py-6 mt-10 pt-0">
             {/* Global Add Feedback */}
             {globalAddSuccess && <div className="text-green-600 mb-2 text-center font-semibold">{globalAddSuccess}</div>}
             {globalAddError && <div className="text-red-500 mb-2 text-center font-semibold">{globalAddError}</div>}
