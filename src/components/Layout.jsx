@@ -35,10 +35,10 @@ const Layout = () => {
           pt-16  // Push below navbar (h-16) with minimal space
           ${isOpen ? "ml-60" : "ml-16"} 
           ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-black"} 
-          h-screen overflow-hidden px-4 pb-4 transition-all duration-300
+          h-screen overflow-x-hidden px-4 pb-4 transition-all duration-300
         `}
       >
-        <div className="h-full overflow-auto">
+        <div className="h-full overflow-auto overflow-x-hidden">
           <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />
         </div>
       </div>

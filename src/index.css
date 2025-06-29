@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+/* Global styles to prevent horizontal scrolling */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure charts and components don't overflow */
+.recharts-responsive-container {
+  overflow: hidden !important;
+}
