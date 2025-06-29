@@ -169,24 +169,21 @@ const EnhancedCustomerSearch = ({
                 </div>
             )}
             
-            {/* Search Result Modal - keeping the original modal logic */}
+            {/* Search Result Modal - matching Orders page style */}
             {searchResult && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-                    <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onSearchClose}></div>
-                    <div className="relative bg-white border border-blue-300 rounded-lg p-6 w-full max-w-2xl shadow-lg max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-gray-800">
-                                Customer Details (#{searchResult.id})
-                            </h3>
-                            <button
-                                type="button"
-                                onClick={onSearchClose}
-                                className="text-gray-500 hover:text-red-600 transition-colors text-2xl"
-                                title="Close"
-                            >
-                                ×
-                            </button>
-                        </div>
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="bg-white border border-blue-300 rounded-lg p-6 w-full max-w-2xl shadow-lg relative max-h-[90vh] overflow-y-auto">
+                        <button
+                            type="button"
+                            onClick={onSearchClose}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-red-600 transition-colors text-2xl"
+                            title="Close"
+                        >
+                            ×
+                        </button>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                            Customer Details (#{searchResult.id})
+                        </h3>
                         <div className="text-center text-gray-600">
                             Customer details for: {searchResult.customerName}
                         </div>
