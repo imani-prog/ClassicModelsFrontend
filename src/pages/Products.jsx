@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IoScale } from 'react-icons/io5';
 import ConfirmDialog from '../components/ProductComponents/ConfirmDialog';
 import EnhancedProductSearch from '../components/ProductComponents/EnhancedProductSearch';
@@ -47,7 +47,6 @@ const Products = () => {
     const [searchSuccess, setSearchSuccess] = useState('');
     const [showAdd, setShowAdd] = useState(false);
     const [addForm, setAddForm] = useState({
-        productCode: '',
         productName: '',
         productLine: '',
         productVendor: '',
@@ -60,12 +59,94 @@ const Products = () => {
     const [addLoading, setAddLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const [availableProductLines, setAvailableProductLines] = useState([]);
 
     // Toast helper
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
     };
+
+    // Fetch product lines from backend
+    const fetchProductLines = useCallback(async () => {
+        try {
+            console.log('Attempting to fetch product lines...');
+            
+            // Try multiple possible endpoints
+            const possibleEndpoints = [
+                'http://localhost:8081/productlines',
+                'http://localhost:8081/productLines', 
+                'http://localhost:8081/api/productlines',
+                'http://localhost:8081/api/productLines',
+                'http://localhost:8081/product-lines'
+            ];
+            
+            let success = false;
+            let productLinesData = [];
+            
+            for (const endpoint of possibleEndpoints) {
+                try {
+                    console.log(`Trying endpoint: ${endpoint}`);
+                    const response = await fetch(endpoint);
+                    console.log(`Response status for ${endpoint}:`, response.status);
+                    
+                    if (response.ok) {
+                        productLinesData = await response.json();
+                        console.log('Successfully fetched product lines from:', endpoint);
+                        console.log('Product lines data:', productLinesData);
+                        success = true;
+                        break;
+                    }
+                } catch (endpointError) {
+                    console.log(`Failed to fetch from ${endpoint}:`, endpointError.message);
+                    continue;
+                }
+            }
+            
+            if (success) {
+                setAvailableProductLines(productLinesData);
+            } else {
+                console.error('All product line endpoints failed');
+                showToast('Could not find product lines endpoint. Please check your backend API.', 'error');
+                
+                // As a last resort, use the existing product lines from products
+                if (productLines && productLines.length > 0) {
+                    console.log('Falling back to existing product lines from products:', productLines);
+                    setAvailableProductLines(productLines);
+                    showToast('Using product lines from existing products as fallback', 'warning');
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching product lines:', error);
+            showToast('Error connecting to database for product lines', 'error');
+            
+            // Fallback to existing product lines
+            if (productLines && productLines.length > 0) {
+                console.log('Using fallback product lines:', productLines);
+                setAvailableProductLines(productLines);
+            }
+        }
+    }, [productLines]);
+
+    // Fetch product lines when component mounts
+    useEffect(() => {
+        // Test basic connectivity first
+        fetch('http://localhost:8081/products')
+            .then(response => {
+                console.log('Basic connectivity test - products endpoint status:', response.status);
+                if (response.ok) {
+                    console.log('✅ Backend is reachable at localhost:8081');
+                } else {
+                    console.log('❌ Backend products endpoint returned:', response.status);
+                }
+            })
+            .catch(error => {
+                console.log('❌ Backend connectivity test failed:', error.message);
+            });
+            
+        // Now try to fetch product lines
+        fetchProductLines();
+    }, [fetchProductLines]);
 
     // Product selection handlers
     const handleSelectProduct = (productCode, checked) => {
@@ -112,6 +193,8 @@ const Products = () => {
         setEditProduct(product);
         setEditForm({ ...product });
         setShowEdit(true);
+        // Refresh product lines to ensure we have the latest data
+        fetchProductLines();
     };
 
     const handleEditInput = (e) => {
@@ -166,7 +249,6 @@ const Products = () => {
     const handleAddProduct = () => {
         setShowAdd(true);
         setAddForm({
-            productCode: '',
             productName: '',
             productLine: '',
             productVendor: '',
@@ -178,6 +260,8 @@ const Products = () => {
         });
         setSearchError('');
         setSearchSuccess('');
+        // Refresh product lines to ensure we have the latest data
+        fetchProductLines();
     };
 
     const handleAddInput = (e) => {
@@ -301,7 +385,23 @@ const Products = () => {
                         <input name="productName" value={editForm.productName || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         
                         <label className="font-medium text-gray-700">Product Line:</label>
-                        <input name="productLine" value={typeof editForm.productLine === 'object' ? (editForm.productLine.productLine || editForm.productLine.textDescription || '') : (editForm.productLine || '')} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <select 
+                            name="productLine" 
+                            value={typeof editForm.productLine === 'object' ? (editForm.productLine.productLine || editForm.productLine.textDescription || '') : (editForm.productLine || '')} 
+                            onChange={handleEditInput} 
+                            required 
+                            className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">Select a product line</option>
+                            {availableProductLines.map((line, index) => {
+                                const lineValue = typeof line === 'object' ? (line.productLine || line.textDescription || line) : line;
+                                return (
+                                    <option key={index} value={lineValue}>
+                                        {lineValue}
+                                    </option>
+                                );
+                            })}
+                        </select>
                         
                         <label className="font-medium text-gray-700">Product Vendor:</label>
                         <input name="productVendor" value={editForm.productVendor || ''} onChange={handleEditInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -334,14 +434,27 @@ const Products = () => {
                 <form onSubmit={handleAddSave}>
                     {searchError && <div className="text-red-500 mb-2">{searchError}</div>}
                     <div className="grid grid-cols-2 gap-3 items-center">
-                        <label className="font-medium text-gray-700">Product Code:</label>
-                        <input name="productCode" value={addForm.productCode} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                        
                         <label className="font-medium text-gray-700">Product Name:</label>
                         <input name="productName" value={addForm.productName} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         
                         <label className="font-medium text-gray-700">Product Line:</label>
-                        <input name="productLine" value={addForm.productLine} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <select 
+                            name="productLine" 
+                            value={addForm.productLine} 
+                            onChange={handleAddInput} 
+                            required 
+                            className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">Select a product line</option>
+                            {availableProductLines.map((line, index) => {
+                                const lineValue = typeof line === 'object' ? (line.productLine || line.textDescription || line) : line;
+                                return (
+                                    <option key={index} value={lineValue}>
+                                        {lineValue}
+                                    </option>
+                                );
+                            })}
+                        </select>
                         
                         <label className="font-medium text-gray-700">Product Vendor:</label>
                         <input name="productVendor" value={addForm.productVendor} onChange={handleAddInput} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />

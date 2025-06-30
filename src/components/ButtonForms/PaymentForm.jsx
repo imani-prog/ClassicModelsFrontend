@@ -31,14 +31,20 @@ const PaymentForm = ({ showForm, onClose, onSubmit }) => {
                 paymentDate: form.date
             };
 
+            console.log('Sending payment payload:', payload);
+
             const response = await fetch('http://localhost:8081/payments/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
+            console.log('Payment response status:', response.status);
+
             if (!response.ok) {
-                throw new Error('Failed to add payment');
+                const errorText = await response.text();
+                console.error('Payment creation failed:', errorText);
+                throw new Error(`Failed to add payment: ${response.status} - ${errorText}`);
             }
 
             const result = await response.json();
@@ -118,7 +124,7 @@ const PaymentForm = ({ showForm, onClose, onSubmit }) => {
                             onChange={handleInputChange} 
                             required 
                             className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter check number"
+                            placeholder="e.g. CHK-001"
                         />
                     </div>
                     

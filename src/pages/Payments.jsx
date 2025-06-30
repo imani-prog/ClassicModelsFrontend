@@ -532,46 +532,154 @@ const Payments = () => {
                 )}
             </Modal>
             <Modal open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-                <form onSubmit={e => {
+                <form onSubmit={async (e) => {
                     e.preventDefault();
                     setAddLoading(true);
                     setAddError('');
                     setAddSuccess('');
-                    const payload = {
-                        id: {
-                            customerNumber: addForm.customerId,
-                            checkNumber: addForm.checkNo
-                        },
-                        amount: addForm.amount,
-                        paymentDate: addForm.date
-                    };
-                    fetch('http://localhost:8081/payments/save', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    })
-                        .then(res => {
-                            if (!res.ok) throw new Error('Failed to add payment');
-                            return res.json();
-                        })
-                        .then(added => {
-                            setPayments(payments => [
-                                {
-                                    customerId: added.id.customerNumber,
-                                    checkNo: added.id.checkNumber,
-                                    amount: added.amount,
-                                    date: added.paymentDate
+                    
+                    // Pre-validation checks
+                    console.log('Starting payment creation...');
+                    
+                    // Check if customer exists
+                    try {
+                        const customerCheck = await fetch(`http://localhost:8081/customers/${addForm.customerId}`);
+                        console.log('Customer check status:', customerCheck.status);
+                        if (!customerCheck.ok) {
+                            throw new Error(`Customer ${addForm.customerId} does not exist`);
+                        }
+                        console.log('✅ Customer exists');
+                    } catch (customerError) {
+                        console.error('❌ Customer validation failed:', customerError);
+                        setAddError(`Customer validation failed: ${customerError.message}`);
+                        setAddLoading(false);
+                        return;
+                    }
+                    
+                    // Check for duplicate check number
+                    const duplicatePayment = payments.find(p => 
+                        p.customerId === addForm.customerId && p.checkNo === addForm.checkNo
+                    );
+                    if (duplicatePayment) {
+                        setAddError(`Payment with Customer ID ${addForm.customerId} and Check Number ${addForm.checkNo} already exists`);
+                        setAddLoading(false);
+                        return;
+                    }
+                    console.log('✅ No duplicate check number found');
+                    
+                    try {
+                        const payload = {
+                            id: {
+                                customerNumber: addForm.customerId,
+                                checkNumber: addForm.checkNo
+                            },
+                            amount: parseFloat(addForm.amount),
+                            paymentDate: addForm.date
+                        };
+                        
+                        console.log('Sending payment payload:', payload);
+                        
+                        // Let's also check what we're sending exactly
+                        console.log('Customer ID type:', typeof addForm.customerId, 'Value:', addForm.customerId);
+                        console.log('Check Number type:', typeof addForm.checkNo, 'Value:', addForm.checkNo);
+                        console.log('Amount type:', typeof parseFloat(addForm.amount), 'Value:', parseFloat(addForm.amount));
+                        console.log('Date type:', typeof addForm.date, 'Value:', addForm.date);
+                        
+                        // Try a different date format - some backends expect timestamp
+                        const paymentDateFormatted = new Date(addForm.date).toISOString().split('T')[0];
+                        console.log('Formatted date:', paymentDateFormatted);
+                        
+                        const alternativePayload = {
+                            id: {
+                                customerNumber: parseInt(addForm.customerId), // Try as number
+                                checkNumber: addForm.checkNo
+                            },
+                            amount: parseFloat(addForm.amount),
+                            paymentDate: paymentDateFormatted // Use formatted date
+                        };
+                        
+                        console.log('Alternative payload:', alternativePayload);
+                        
+                        // Let's try different payload structures to see what the backend expects
+                        const payloadVariations = [
+                            // Current structure
+                            alternativePayload,
+                            
+                            // Flat structure
+                            {
+                                customerNumber: parseInt(addForm.customerId),
+                                checkNumber: addForm.checkNo,
+                                amount: parseFloat(addForm.amount),
+                                paymentDate: paymentDateFormatted
+                            },
+                            
+                            // Different key structure
+                            {
+                                id: {
+                                    customerNumber: parseInt(addForm.customerId),
+                                    checkNumber: addForm.checkNo
                                 },
-                                ...payments
-                            ]);
-                            setAddSuccess('Payment added successfully.');
-                            setTimeout(() => {
-                                setAddSuccess('');
-                                setAddModalOpen(false);
-                            }, 1500);
-                        })
-                        .catch(err => setAddError(err.message))
-                        .finally(() => setAddLoading(false));
+                                amount: parseFloat(addForm.amount),
+                                paymentDate: paymentDateFormatted
+                            }
+                        ];
+                        
+                        console.log('Trying payload variations...');
+                        
+                        let paymentSuccess = false;
+                        
+                        for (let i = 0; i < payloadVariations.length; i++) {
+                            const testPayload = payloadVariations[i];
+                            console.log(`Attempt ${i + 1}:`, testPayload);
+                            
+                            try {
+                                const response = await fetch('http://localhost:8081/payments/save', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(testPayload)
+                                });
+                                
+                                console.log(`Attempt ${i + 1} response status:`, response.status);
+                                
+                                if (response.ok) {
+                                    console.log(`✅ Success with payload structure ${i + 1}!`);
+                                    const added = await response.json();
+                                    setPayments(payments => [
+                                        {
+                                            customerId: added.id ? added.id.customerNumber : added.customerNumber,
+                                            checkNo: added.id ? added.id.checkNumber : added.checkNumber,
+                                            amount: added.amount,
+                                            date: added.paymentDate
+                                        },
+                                        ...payments
+                                    ]);
+                                    setAddSuccess('Payment added successfully.');
+                                    setTimeout(() => {
+                                        setAddSuccess('');
+                                        setAddModalOpen(false);
+                                    }, 1500);
+                                    paymentSuccess = true;
+                                    break; // Exit loop on success
+                                } else {
+                                    const errorText = await response.text();
+                                    console.error(`Attempt ${i + 1} failed:`, response.status, errorText);
+                                }
+                            } catch (err) {
+                                console.error(`Attempt ${i + 1} error:`, err);
+                            }
+                        }
+                        
+                        // If all attempts failed
+                        if (!paymentSuccess) {
+                            setAddError('All payload variations failed. Check backend API documentation.');
+                        }
+                        
+                    } catch (err) {
+                        console.error('Payment creation error:', err);
+                        setAddError(err.message);
+                    } finally {
+                        setAddLoading(false);
+                    }
                 }}>
                     <h2 className="text-xl font-bold mb-4">Add Payment</h2>
                     {addError && <div className="text-red-500 mb-2">{addError}</div>}
@@ -581,7 +689,7 @@ const Payments = () => {
                         <input name="customerId" value={addForm.customerId} onChange={e => setAddForm(f => ({ ...f, customerId: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         
                         <label className="font-medium text-gray-700">Check No:</label>
-                        <input name="checkNo" value={addForm.checkNo} onChange={e => setAddForm(f => ({ ...f, checkNo: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input name="checkNo" value={addForm.checkNo} onChange={e => setAddForm(f => ({ ...f, checkNo: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. CHK-001" />
                         
                         <label className="font-medium text-gray-700">Amount:</label>
                         <input name="amount" value={addForm.amount} onChange={e => setAddForm(f => ({ ...f, amount: e.target.value }))} required className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" type="number" step="0.01" />
