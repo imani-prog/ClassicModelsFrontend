@@ -1,4 +1,5 @@
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const EnhancedCustomerTable = ({ 
     customers, 
@@ -50,8 +51,8 @@ const EnhancedCustomerTable = ({
     ];
 
     return (
-        <div className="w-full h-full flex flex-col">
-            <div className="flex-1 overflow-auto border border-blue-300 rounded">
+        <div className="w-full h-full flex flex-col bg-white rounded-lg shadow">
+            <div className="flex-1 overflow-y-auto overflow-x-auto border border-blue-300 rounded">
                 <table className="w-full min-w-max">
                     <thead className="bg-[#f5f5f5] border-b-2 border-[#258cbf] sticky top-0 z-30">
                         <tr>
@@ -99,6 +100,13 @@ const EnhancedCustomerTable = ({
                                     ))}
                                     <td className="border-t-2 text-center border-[#42befb] px-1 py-1.5 whitespace-nowrap sticky right-0 bg-white z-20">
                                         <div className="flex items-center justify-center gap-1">
+                                            <Link
+                                                to={`/customers/${customer.id || customer.customerNumber}`}
+                                                className="bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded transition-colors"
+                                                title="View Details"
+                                            >
+                                                <FaEye className="w-3 h-3" />
+                                            </Link>
                                             <button
                                                 className="bg-yellow-500 hover:bg-yellow-600 text-white p-1.5 rounded transition-colors"
                                                 onClick={() => onEditClick(customer)}

@@ -68,9 +68,9 @@ const Customers = () => {
     } = useCustomerEnhancements(allCustomers);
 
     return (
-        <div className="max-w-6xl mx-auto px-2 h-full flex flex-col pt-2">
+        <div className="h-full flex flex-col px-2 py-2 max-w-7xl mx-auto">
             {/* Header Section - Fixed height */}
-            <div className='flex items-start justify-between mb-3 flex-shrink-0'>
+            <div className='flex items-start justify-between mb-4 flex-shrink-0'>
                 <div className="flex flex-col">
                     <h1 className="text-2xl font-bold mb-1">Customers</h1>
                     <p className="text-gray-600 text-sm">Manage your customer database and information</p>
@@ -81,7 +81,7 @@ const Customers = () => {
             </div>
             
             {/* Search Section - Fixed height */}
-            <div className="mb-3 flex-shrink-0">
+            <div className="mb-4 flex-shrink-0">
                 <EnhancedCustomerSearch
                     searchResult={searchResult}
                     searchError={searchError}
@@ -111,8 +111,8 @@ const Customers = () => {
                 />
             </div>
 
-            {/* Table Section - Flexible height */}
-            <div className="flex-1 min-h-0 mb-2">
+            {/* Table Section - Flexible height with internal scroll */}
+            <div className="flex-1 min-h-0 mb-4 overflow-hidden">
                 <EnhancedCustomerTable
                     customers={filteredCustomers}
                     loading={customersLoading}

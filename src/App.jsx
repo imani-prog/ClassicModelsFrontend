@@ -1,16 +1,19 @@
-import React from 'react'
 import { Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout'
+import OrderCard from './components/OrderCard'
+import ProductCard from './components/ProductCard'
+import CustomerDetail from './pages/CustomerDetail'
+import CustomerEdit from './pages/CustomerEdit'
+import CustomerOrders from './pages/CustomerOrders'
+import CustomerPayments from './pages/CustomerPayments'
+import Customers from './pages/Customers'
 import Dashboard from './pages/Dashboard'
+import Employees from './pages/Employees'
+import NotFound from './pages/NotFound'
 import Offices from './pages/Offices'
 import Orders from './pages/Orders'
 import Payments from './pages/Payments'
 import Products from './pages/Products'
-import Employees from './pages/Employees'
-import Customers from './pages/Customers'
-import NotFound from './pages/NotFound'
-import ProductCard from './components/ProductCard'
-import OrderCard from './components/OrderCard'
-import Layout from './components/Layout'
 // import Navbar from './components/Navbar'
 
 
@@ -19,13 +22,22 @@ const App = () => {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
+        
+        {/* Customer routes */}
         <Route path="/customers" element={<Customers />} />
+        <Route path="/customers/:customerId" element={<CustomerDetail />} />
+        <Route path="/customers/:customerId/edit" element={<CustomerEdit />} />
+        <Route path="/customers/:customerId/orders" element={<CustomerOrders />} />
+        <Route path="/customers/:customerId/payments" element={<CustomerPayments />} />
+        
+        {/* Other entity routes */}
         <Route path="/employees" element={<Employees />} />
         <Route path="/offices" element={<Offices />} />
         <Route path="/orders" element={<Orders />} />
-        {/* <Route path="/Navbar" element={<Navbar />} /> */}
         <Route path="/payments" element={<Payments />} />
         <Route path="/products" element={<Products />} />
+        
+        {/* Legacy routes */}
         <Route path="/product" element={<ProductCard />} />
         <Route path="/order" element={<OrderCard />} />
         <Route path="*" element={<NotFound />} />
