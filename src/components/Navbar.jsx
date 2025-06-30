@@ -1,13 +1,15 @@
-import {
-  Bell,
-  ChevronDown,
-  MessageSquare,
-  Moon,
-  Search,
-  Settings,
-  Sun
-} from 'lucide-react';
 import React, { useState } from 'react';
+import { 
+  Search, 
+  Moon, 
+  Sun,
+  Bell, 
+  MessageSquare, 
+  Maximize2, 
+  Grid3X3,
+  Settings,
+  ChevronDown
+} from 'lucide-react';
 
 const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -36,8 +38,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-60 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm z-50">
-      <div className="flex items-center justify-between px-6 h-full">
+    <nav className="fixed top-0 pb-20  left-60 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm z-50">
+      <div className="flex items-center justify-between px-6 py-4">
         
         {/* Left Section - Search */}
         <div className="flex-1 max-w-md">

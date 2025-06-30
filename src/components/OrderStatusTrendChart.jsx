@@ -44,6 +44,7 @@ const Clock = () => (
 
 const OrderStatusTrendChart = () => {
   const [trendData, setTrendData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [summaryStats, setSummaryStats] = useState({
     shipped: { total: 0, trend: 0 },
     completed: { total: 0, trend: 0 },
@@ -51,9 +52,17 @@ const OrderStatusTrendChart = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:8081/api/dashboard/order-status-trend')
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8081/api/dashboard/order-status-trend');
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+          setLoading(false);
+          return;
+        }
+
         const allDates = new Set();
         const trendMap = {};
 
@@ -70,12 +79,13 @@ const OrderStatusTrendChart = () => {
           };
         });
 
-        // Step 2: Ensure every date has all keys with better date formatting
+        // Step 2: Ensure every date has all keys with consistent date formatting
         const normalized = Array.from(allDates)
           .sort()
           .map((date) => {
+            const dateObj = new Date(date);
             return {
-              date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
               fullDate: date,
               shipped: trendMap[date]?.shipped || 0,
               completed: trendMap[date]?.completed || 0,
@@ -122,11 +132,15 @@ const OrderStatusTrendChart = () => {
         });
 
         setTrendData(normalized);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('Error fetching trend data:', err);
-      });
-  }, []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array to run only once
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -218,163 +232,205 @@ const OrderStatusTrendChart = () => {
 
       {/* Enhanced Chart Container */}
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-5 border border-gray-200">
-        <div style={{ width: '100%', height: 280 }}>
-          <ResponsiveContainer>
-            <LineChart 
-              data={trendData}
-              margin={{ top: 15, right: 15, left: 5, bottom: 15 }}
-            >
-              <defs>
-                <linearGradient id="shippedGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                  <stop offset="50%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="completedGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10B981" stopOpacity={0.3}/>
-                  <stop offset="50%" stopColor="#10B981" stopOpacity={0.1}/>
-                  <stop offset="100%" stopColor="#10B981" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="pendingGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.3}/>
-                  <stop offset="50%" stopColor="#F59E0B" stopOpacity={0.1}/>
-                  <stop offset="100%" stopColor="#F59E0B" stopOpacity={0}/>
-                </linearGradient>
+        {loading ? (
+          <div className="flex items-center justify-center h-80">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <span className="ml-3 text-gray-600">Loading chart...</span>
+          </div>
+        ) : (
+          <div style={{ width: '100%', height: 280 }}>
+            <ResponsiveContainer>
+              <LineChart 
+                data={trendData}
+                margin={{ top: 15, right: 15, left: 5, bottom: 15 }}
+              >
+                {/* ...existing defs, grid, axes, tooltip, legend, and lines... */}
+                <defs>
+                  <linearGradient id="shippedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                    <stop offset="50%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="completedGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity={0.3}/>
+                    <stop offset="50%" stopColor="#10B981" stopOpacity={0.1}/>
+                    <stop offset="100%" stopColor="#10B981" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="pendingGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.3}/>
+                    <stop offset="50%" stopColor="#F59E0B" stopOpacity={0.1}/>
+                    <stop offset="100%" stopColor="#F59E0B" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
                 
-                {/* Drop shadow filters for enhanced visual appeal */}
-                <filter id="dropshadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
-                </filter>
-              </defs>
-              
-              <CartesianGrid 
-                strokeDasharray="2 4" 
-                stroke="#E5E7EB" 
-                strokeOpacity={0.3}
-                horizontal={true}
-                vertical={false}
-              />
-              
-              <XAxis 
-                dataKey="date" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: '#6B7280', fontWeight: '500' }}
-                dy={8}
-                interval={0}
-              />
-              
-              <YAxis 
-                allowDecimals={false}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: '#6B7280', fontWeight: '500' }}
-                dx={-8}
-                domain={[0, 'dataMax + 1']}
-              />
-              
-              <Tooltip content={<CustomTooltip />} />
-              
-              <Legend 
-                verticalAlign="top" 
-                align="right"
-                iconType="circle"
-                wrapperStyle={{
-                  paddingBottom: '15px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  color: '#374151'
-                }}
-              />
-              
-              <Line
-                type="monotone"
-                dataKey="shipped"
-                stroke="#3B82F6"
-                name="Shipped"
-                strokeWidth={3}
-                fill="url(#shippedGradient)"
-                dot={{ 
-                  r: 5, 
-                  fill: '#3B82F6',
-                  strokeWidth: 3,
-                  stroke: '#ffffff',
-                  filter: 'drop-shadow(0px 2px 4px rgba(59, 130, 246, 0.3))'
-                }}
-                activeDot={{ 
-                  r: 7, 
-                  fill: '#3B82F6',
-                  strokeWidth: 3,
-                  stroke: '#ffffff',
-                  filter: 'drop-shadow(0px 2px 8px rgba(59, 130, 246, 0.5))'
-                }}
-                connectNulls={false}
-                animationDuration={1500}
-                animationEasing="ease-in-out"
-                strokeDasharray="0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              <Line
-                type="monotone"
-                dataKey="completed"
-                stroke="#10B981"
-                name="Completed"
-                strokeWidth={3}
-                fill="url(#completedGradient)"
-                dot={{ 
-                  r: 5, 
-                  fill: '#10B981',
-                  strokeWidth: 3,
-                  stroke: '#ffffff',
-                  filter: 'drop-shadow(0px 2px 4px rgba(16, 185, 129, 0.3))'
-                }}
-                activeDot={{ 
-                  r: 7, 
-                  fill: '#10B981',
-                  strokeWidth: 3,
-                  stroke: '#ffffff',
-                  filter: 'drop-shadow(0px 2px 8px rgba(16, 185, 129, 0.5))'
-                }}
-                connectNulls={false}
-                animationDuration={1500}
-                animationEasing="ease-in-out"
-                strokeDasharray="0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              <Line
-                type="monotone"
-                dataKey="pending"
-                stroke="#F59E0B"
-                name="Pending"
-                strokeWidth={3}
-                fill="url(#pendingGradient)"
-                dot={{ 
-                  r: 5, 
-                  fill: '#F59E0B',
-                  strokeWidth: 3,
-                  stroke: '#ffffff',
-                  filter: 'drop-shadow(0px 2px 4px rgba(245, 158, 11, 0.3))'
-                }}
-                activeDot={{ 
-                  r: 7, 
-                  fill: '#F59E0B',
-                  strokeWidth: 3,
-                  stroke: '#ffffff',
-                  filter: 'drop-shadow(0px 2px 8px rgba(245, 158, 11, 0.5))'
-                }}
-                connectNulls={false}
-                animationDuration={1500}
-                animationEasing="ease-in-out"
-                strokeDasharray="0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+                <CartesianGrid 
+                  strokeDasharray="2 4" 
+                  stroke="#E5E7EB" 
+                  strokeOpacity={0.3}
+                  horizontal={true}
+                  vertical={false}
+                />
+                
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#6B7280', fontWeight: '500' }}
+                  dy={8}
+                  interval={0}
+                />
+                
+                <YAxis 
+                  allowDecimals={false}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#6B7280', fontWeight: '500' }}
+                  dx={-8}
+                  domain={[0, 'dataMax + 1']}
+                />
+                
+                <Tooltip content={<CustomTooltip />} />
+                
+                <Legend 
+                  verticalAlign="top" 
+                  align="right"
+                  iconType="circle"
+                  wrapperStyle={{
+                    paddingBottom: '15px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}
+                />
+                
+                <Line
+                  type="monotone"
+                  dataKey="shipped"
+                  stroke="#3B82F6"
+                  name="Shipped"
+                  strokeWidth={3}
+                  dot={{ 
+                    r: 5, 
+                    fill: '#3B82F6',
+                    strokeWidth: 2,
+                    stroke: '#ffffff'
+                  }}
+                  activeDot={{ 
+                    r: 7, 
+                    fill: '#3B82F6',
+                    strokeWidth: 2,
+                    stroke: '#ffffff'
+                  }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+                
+                <Line
+                  type="monotone"
+                  dataKey="completed"
+                  stroke="#10B981"
+                  name="Completed"
+                  strokeWidth={3}
+                  dot={{ 
+                    r: 5, 
+                    fill: '#10B981',
+                    strokeWidth: 2,
+                    stroke: '#ffffff'
+                  }}
+                  activeDot={{ 
+                    r: 7, 
+                    fill: '#10B981',
+                    strokeWidth: 2,
+                    stroke: '#ffffff'
+                  }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+                
+                <Line
+                  type="monotone"
+                  dataKey="pending"
+                  stroke="#F59E0B"
+                  name="Pending"
+                  strokeWidth={3}
+                  dot={{ 
+                    r: 5, 
+                    fill: '#F59E0B',
+                    strokeWidth: 2,
+                    stroke: '#ffffff'
+                  }}
+                  activeDot={{ 
+                    r: 7, 
+                    fill: '#F59E0B',
+                    strokeWidth: 2,
+                    stroke: '#ffffff'
+                  }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+
+      {/* Business Insights Section */}
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Order Processing Efficiency */}
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <h4 className="font-semibold text-blue-900 text-sm">Processing Efficiency</h4>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-blue-700">Completion Rate:</span>
+              <span className="text-sm font-bold text-blue-900">
+                {summaryStats.shipped.total + summaryStats.completed.total > 0 
+                  ? Math.round(((summaryStats.shipped.total + summaryStats.completed.total) / 
+                    (summaryStats.shipped.total + summaryStats.completed.total + summaryStats.pending.total)) * 100)
+                  : 0}%
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-blue-700">Avg Daily Orders:</span>
+              <span className="text-sm font-bold text-blue-900">
+                {Math.round((summaryStats.shipped.total + summaryStats.completed.total + summaryStats.pending.total) / 7)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions & Alerts */}
+        <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+            <h4 className="font-semibold text-orange-900 text-sm">Action Required</h4>
+          </div>
+          <div className="space-y-2">
+            {summaryStats.pending.total > 5 ? (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-orange-700">High pending orders - Review required</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-xs text-orange-700">Pending orders under control</span>
+              </div>
+            )}
+            {summaryStats.shipped.trend > 0 ? (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-xs text-orange-700">Shipping trend positive ↗</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                <span className="text-xs text-orange-700">Monitor shipping performance</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

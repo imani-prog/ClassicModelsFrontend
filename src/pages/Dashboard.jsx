@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FaArrowDown, FaArrowUp, FaBell, FaBox, FaClipboardCheck, FaClock, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
-import BusinessPerformanceMetrics from '../components/BusinessPerformanceMetrics';
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
+import BusinessAnalytics from '../components/BusinessPerformanceMetrics';
 import OrderStatusTrendChart from '../components/OrderStatusTrendChart';
 import QuickActions from '../components/QuickActions';
 import TopPayments from '../components/TopPayments';
@@ -103,13 +103,18 @@ const Dashboard = () => {
                 
                 {/* Small utility elements in the middle space */}
                 <div className="flex items-center gap-4 mt-2">
-                    {/* Current Date */}
-                    <div className="text-center">
-                        <div className="text-xs text-gray-500 font-medium">Today</div>
+                    {/* Current Date - Enhanced */}
+                    <div className="text-center bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+                        <div className="text-xs text-gray-500 font-medium">
+                            {new Date().toLocaleDateString('en-US', { 
+                                weekday: 'short'
+                            })}
+                        </div>
                         <div className="text-sm font-semibold text-gray-700">
                             {new Date().toLocaleDateString('en-US', { 
                                 month: 'short', 
-                                day: 'numeric' 
+                                day: 'numeric',
+                                year: 'numeric'
                             })}
                         </div>
                     </div>
@@ -318,71 +323,193 @@ const Dashboard = () => {
                     {/* Order Status Trends and Business Performance Section */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <OrderStatusTrendChart />
-                        <BusinessPerformanceMetrics />
+                        <BusinessAnalytics />
                     </div>
 
                     {/* Analytics Charts */}
                     <div id="analytics-section" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Pie Chart */}
-                        <div className="bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-6">Entity Distribution</h3>
-                            <div className="flex justify-center">
-                                <PieChart width={300} height={300}>
-                                    <Pie 
-                                        data={chartData} 
-                                        dataKey="value" 
-                                        outerRadius={100}
-                                        stroke="#fff"
-                                        strokeWidth={2}
-                                    >
-                                        {chartData.map((_, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip 
-                                        contentStyle={{
-                                            backgroundColor: '#fff',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            color: 'white'
-                                        }}
-                                    />
-                                </PieChart>
+                        {/* Enhanced Pie Chart */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-800">Entity Distribution</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Overview of all entities in the system</p>
+                                </div>
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <FaBox className="w-4 h-4 text-blue-600" />
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-col lg:flex-row items-center gap-6">
+                                {/* Pie Chart */}
+                                <div className="flex-shrink-0">
+                                    <PieChart width={280} height={280}>
+                                        <Pie 
+                                            data={chartData} 
+                                            dataKey="value" 
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={100}
+                                            innerRadius={50}
+                                            stroke="#fff"
+                                            strokeWidth={3}
+                                        >
+                                            {chartData.map((_, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{
+                                                backgroundColor: '#fff',
+                                                border: 'none',
+                                                borderRadius: '12px',
+                                                color: 'white',
+                                                fontSize: '14px',
+                                                fontWeight: '500',
+                                                boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                                            }}
+                                        />
+                                    </PieChart>
+                                </div>
+                                
+                                {/* Legend */}
+                                <div className="flex-1 space-y-3">
+                                    {chartData.map((entry, index) => (
+                                        <div key={entry.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div 
+                                                    className="w-4 h-4 rounded-full shadow-sm"
+                                                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                                ></div>
+                                                <span className="text-sm font-medium text-gray-700 capitalize">{entry.name}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-bold text-gray-900">{entry.value}</div>
+                                                <div className="text-xs text-gray-500">
+                                                    {chartData.length > 0 ? Math.round((entry.value / chartData.reduce((sum, item) => sum + item.value, 0)) * 100) : 0}%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Bar Chart */}
-                        <div className="bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-6">Weekly Orders Trend</h3>
+                        {/* Enhanced Bar Chart */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-800">Weekly Orders Trend</h3>
+                                    <p className="text-sm text-gray-500 mt-1">Orders processed over the last 7 days</p>
+                                </div>
+                                <div className="p-2 bg-purple-100 rounded-lg">
+                                    <FaClipboardCheck className="w-4 h-4 text-purple-600" />
+                                </div>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <div className="flex items-center gap-4 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                        <span className="text-gray-600">Orders</span>
+                                    </div>
+                                    <div className="text-gray-400">•</div>
+                                    <div className="text-gray-500">
+                                        Total: <span className="font-semibold text-gray-900">
+                                            {orderTrendData.reduce((sum, item) => sum + (item.orders || 0), 0)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div className="flex justify-center">
-                                <BarChart width={350} height={300} data={orderTrendData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                <BarChart width={380} height={280} data={orderTrendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                    <defs>
+                                        <linearGradient id="orderGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                                            <stop offset="100%" stopColor="#1D4ED8" stopOpacity={0.9}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" strokeOpacity={0.3} />
                                     <XAxis 
                                         dataKey="day" 
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fontSize: 12, fill: '#fff' }}
+                                        tick={{ fontSize: 12, fill: '#6B7280', fontWeight: '500' }}
+                                        height={60}
                                     />
                                     <YAxis 
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fontSize: 12, fill: '#fff' }}
+                                        tick={{ fontSize: 12, fill: '#6B7280', fontWeight: '500' }}
+                                        width={60}
                                     />
                                     <Tooltip 
                                         contentStyle={{
-                                            backgroundColor: '#374151',
+                                            backgroundColor: '#1F2937',
                                             border: 'none',
-                                            borderRadius: '8px',
-                                            color: 'white'
+                                            borderRadius: '12px',
+                                            color: 'white',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
                                         }}
+                                        cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
                                     />
-                                    <Legend />
                                     <Bar 
                                         dataKey="orders" 
-                                        fill="#3B82F6" 
-                                        radius={[4, 4, 0, 0]}
+                                        fill="url(#orderGradient)"
+                                        radius={[6, 6, 0, 0]}
+                                        stroke="#2563EB"
+                                        strokeWidth={1}
                                     />
                                 </BarChart>
+                            </div>
+                            
+                            {/* Quick Stats */}
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <div className="grid grid-cols-3 gap-4 text-center">
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Peak Day</div>
+                                        <div className="text-sm font-semibold text-gray-900">
+                                            {orderTrendData.length > 0 
+                                                ? orderTrendData.reduce((max, item) => 
+                                                    (item.orders || 0) > (max.orders || 0) ? item : max, orderTrendData[0]
+                                                  )?.day || 'N/A'
+                                                : 'N/A'
+                                            }
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Average</div>
+                                        <div className="text-sm font-semibold text-gray-900">
+                                            {orderTrendData.length > 0 
+                                                ? Math.round(orderTrendData.reduce((sum, item) => sum + (item.orders || 0), 0) / orderTrendData.length)
+                                                : 0
+                                            }
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-gray-500 mb-1">Trend</div>
+                                        <div className="text-sm font-semibold flex items-center justify-center gap-1">
+                                            {orderTrendData.length >= 2 && 
+                                             (orderTrendData[orderTrendData.length - 1]?.orders || 0) > (orderTrendData[orderTrendData.length - 2]?.orders || 0) ? (
+                                                <>
+                                                    <FaArrowUp className="w-3 h-3 text-green-500" />
+                                                    <span className="text-green-600">Rising</span>
+                                                </>
+                                            ) : orderTrendData.length >= 2 && 
+                                               (orderTrendData[orderTrendData.length - 1]?.orders || 0) < (orderTrendData[orderTrendData.length - 2]?.orders || 0) ? (
+                                                <>
+                                                    <FaArrowDown className="w-3 h-3 text-red-500" />
+                                                    <span className="text-red-600">Falling</span>
+                                                </>
+                                            ) : (
+                                                <span className="text-gray-500">Stable</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

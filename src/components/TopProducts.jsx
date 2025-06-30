@@ -22,23 +22,28 @@ const TopProducts = () => {
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow w-full h-full">
-      <h3 className="text-lg font-bold mb-4 text-center">Top Products by Price</h3>
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-800">Top Products</h3>
+        <div className="text-sm text-gray-500">Highest priced items</div>
+      </div>
       <div className="overflow-x-auto">
-        <table className="w-full border border-blue-300">
-          <thead className="bg-[#f5f5f5] border-b-2 border-[#258cbf]">
-            <tr>
-              <th className="px-3 py-2 text-center whitespace-nowrap">Name</th>
-              <th className="px-3 py-2 text-center whitespace-nowrap">Buy Price</th>
-              <th className="px-3 py-2 text-center whitespace-nowrap">Quantity</th>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100">
             {products.map((p, i) => (
-              <tr key={i} className="hover:bg-gray-50">
-                <td className="border-t-2 text-center font-medium border-[#42befb] px-3 py-2 whitespace-nowrap">{p.name}</td>
-                <td className="border-t-2 text-center font-medium border-[#42befb] px-3 py-2 whitespace-nowrap">Kshs {p.price}</td>
-                <td className="border-t-2 text-center font-medium border-[#42befb] px-3 py-2 whitespace-nowrap">{p.stock}</td>
+              <tr key={i} className="hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 text-sm font-medium text-gray-900">{p.name}</td>
+                <td className="px-4 py-3 text-sm font-semibold text-right text-blue-600">
+                  Ksh {p.price?.toLocaleString() || 0}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-600 text-right">{p.stock}</td>
               </tr>
             ))}
           </tbody>
