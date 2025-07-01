@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
 import NotFound from './pages/NotFound'
 import Offices from './pages/Offices'
+import OrderDetail from './pages/OrderDetail'
 import Orders from './pages/Orders'
 import Payments from './pages/Payments'
 import Products from './pages/Products'
@@ -30,6 +31,7 @@ const App = () => {
         <Route path="/employees" element={<Employees />} />
         <Route path="/offices" element={<Offices />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:orderId" element={<OrderDetail />} />
         {/* <Route path="/Navbar" element={<Navbar />} /> */}
         <Route path="/payments" element={<Payments />} />
         <Route path="/products" element={<Products />} />

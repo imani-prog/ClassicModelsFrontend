@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { FaCalendarAlt, FaEdit, FaFilter, FaPlus, FaShoppingCart, FaUsers } from 'react-icons/fa';
+import { FaCalendarAlt, FaEdit, FaEye, FaFilter, FaPlus, FaShoppingCart, FaUsers } from 'react-icons/fa';
 import { IoSearch } from 'react-icons/io5';
+import { Link, useLocation } from 'react-router-dom';
 
 function Modal({ open, onClose, children }) {
     if (!open) return null;
@@ -15,6 +16,7 @@ function Modal({ open, onClose, children }) {
 }
 
 const Orders = () => {
+    const location = useLocation();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -78,6 +80,23 @@ const Orders = () => {
                 setLoading(false);
             });
     }, []);
+
+    // Handle URL parameters for pre-filling customer data and edit mode
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const customerId = params.get('customer');
+        const editOrderId = params.get('edit');
+        
+        if (customerId) {
+            setAddForm(prev => ({ ...prev, customerNumber: customerId }));
+            setShowAdd(true); // Automatically open the add order modal
+        }
+        
+        if (editOrderId) {
+            // Trigger edit mode for the specified order
+            handleEditOrder(editOrderId);
+        }
+    }, [location.search]);
 
     // Enhanced filtering and sorting logic
     const filteredOrders = orders
@@ -233,6 +252,21 @@ const Orders = () => {
             })
             .catch(err => setSearchError(err.message))
             .finally(() => setEditLoading(false));
+    };
+
+    // Handle opening order for editing
+    const handleEditOrder = async (orderId) => {
+        try {
+            const response = await fetch(`http://localhost:8081/orders/${orderId}`);
+            if (!response.ok) throw new Error('Order not found');
+            const orderData = await response.json();
+            setSearchResult(orderData);
+            setSearchId(orderId);
+            setIsEditing(true);
+            setShowSearchModal(true);
+        } catch (err) {
+            setSearchError(err.message);
+        }
     };
 
     // Helper function to render order card
@@ -432,6 +466,7 @@ const Orders = () => {
                                     <th className="px-2 py-1 text-center">Required Date</th>
                                     <th className="px-2 py-1 text-center">Shipping Date</th>
                                     <th className="px-2 py-1 text-center">Status</th>
+                                    <th className="px-2 py-1 text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -447,6 +482,24 @@ const Orders = () => {
                                             ${order.status === 'Shipped' ? 'bg-green-500' : order.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500'}`}>
                                                 {order.status}
                                             </button>
+                                        </td>
+                                        <td className="border-t font-medium text-center border-[#42befb] px-2 py-1">
+                                            <div className="flex justify-center gap-2">
+                                                <Link
+                                                    to={`/orders/${order.id}`}
+                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-colors"
+                                                    title="View Order Details"
+                                                >
+                                                    <FaEye className="w-4 h-4" />
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleEditOrder(order.id)}
+                                                    className="text-yellow-600 hover:text-yellow-900 p-1 rounded-md hover:bg-yellow-50 transition-colors"
+                                                    title="Edit Order"
+                                                >
+                                                    <FaEdit className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

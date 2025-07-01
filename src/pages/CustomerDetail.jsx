@@ -15,8 +15,7 @@ const CustomerDetail = () => {
         lastPaymentDate: null,
         accountStatus: 'Active'
     });
-    // const [showActionModal, setShowActionModal] = useState(false); // For future modal functionality
-    // const [modalContent, setModalContent] = useState(null); // For future modal functionality
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -151,158 +150,6 @@ const CustomerDetail = () => {
                        'Review relationship health'
         };
     };
-
-    // Enhanced action handlers - Function for potential future modal functionality
-    // const handleActionPreview = (actionType) => {
-    //     const ordersLogic = getOrdersButtonLogic();
-    //     const paymentsLogic = getPaymentsButtonLogic();
-
-    //     if (actionType === 'orders') {
-    //         setModalContent({
-    //             type: 'orders',
-    //             title: ordersLogic.actionText,
-    //             data: ordersLogic,
-    //             stats: {
-    //                 total: customerStats.totalOrders,
-    //                 lastDate: customerStats.lastOrderDate,
-    //                 status: ordersLogic.hasData ? 'has_data' : 'no_data'
-    //             }
-    //         });
-    //     } else if (actionType === 'payments') {
-    //         setModalContent({
-    //             type: 'payments',
-    //             title: paymentsLogic.actionText,
-    //             data: paymentsLogic,
-    //             stats: {
-    //                 total: customerStats.totalPayments,
-    //                 lastDate: customerStats.lastPaymentDate,
-    //                 status: paymentsLogic.hasData ? 'has_data' : 'no_data'
-    //             }
-    //         });
-    //     }
-    //     setShowActionModal(true);
-    // };
-
-    // Action Preview Modal - For future functionality
-    /*
-    const ActionPreviewModal = () => {
-        if (!showActionModal || !modalContent) return null;
-
-        return (
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-y-auto">
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-800">Action Preview</h3>
-                        <button 
-                            onClick={() => setShowActionModal(false)}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                            <FaTimes className="w-5 h-5" />
-                        </button>
-                    </div>
-                    
-                    <div className="p-4">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                                modalContent.type === 'orders' 
-                                    ? 'bg-blue-100' 
-                                    : 'bg-green-100'
-                            }`}>
-                                {modalContent.type === 'orders' ? (
-                                    <FaClipboardList className={`text-xl ${
-                                        modalContent.data.colorScheme === 'blue' ? 'text-blue-600' : 'text-indigo-600'
-                                    }`} />
-                                ) : (
-                                    <FaCreditCard className={`text-xl ${
-                                        modalContent.data.colorScheme === 'green' ? 'text-green-600' : 'text-orange-600'
-                                    }`} />
-                                )}
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-gray-800">{modalContent.title}</h4>
-                                <p className="text-sm text-gray-600">{modalContent.data.description}</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <div className="bg-gray-50 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <FaInfoCircle className="text-blue-500 text-sm" />
-                                    <span className="font-medium text-gray-700 text-sm">Current Status</span>
-                                </div>
-                                <p className="text-sm text-gray-600">
-                                    {modalContent.stats.status === 'has_data' 
-                                        ? `You have ${modalContent.type === 'orders' ? 'order' : 'payment'} records for this customer`
-                                        : `No ${modalContent.type === 'orders' ? 'order' : 'payment'} records found for this customer`
-                                    }
-                                </p>
-                            </div>
-
-                            {modalContent.stats.status === 'has_data' && (
-                                <div className="bg-gray-50 rounded-lg p-3">
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <p className="text-xs text-gray-500 font-medium">Total {modalContent.type === 'orders' ? 'Orders' : 'Amount'}</p>
-                                            <p className="text-sm font-bold text-gray-800">
-                                                {modalContent.type === 'orders' 
-                                                    ? modalContent.stats.total 
-                                                    : `Ksh ${modalContent.stats.total.toLocaleString()}`
-                                                }
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-500 font-medium">Last Activity</p>
-                                            <p className="text-sm font-bold text-gray-800">
-                                                {formatDate(modalContent.stats.lastDate)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="bg-blue-50 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <FaChartLine className="text-blue-500 text-sm" />
-                                    <span className="font-medium text-gray-700 text-sm">What You'll See</span>
-                                </div>
-                                <p className="text-sm text-gray-600">
-                                    {modalContent.type === 'orders' 
-                                        ? modalContent.stats.status === 'has_data'
-                                            ? 'Detailed order history, statuses, dates, and amounts for this customer'
-                                            : 'Empty orders page with options to create the first order for this customer'
-                                        : modalContent.stats.status === 'has_data'
-                                            ? 'Complete payment history with check numbers, dates, amounts, and transaction details'
-                                            : 'Empty payments page with setup instructions and payment tracking options'
-                                    }
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2 mt-6">
-                            <Link 
-                                to={`/customers/${customerId}/${modalContent.type}`}
-                                className={`flex-1 text-center py-2 px-4 rounded-md font-medium transition-colors ${
-                                    modalContent.type === 'orders'
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                        : 'bg-green-600 text-white hover:bg-green-700'
-                                }`}
-                                onClick={() => setShowActionModal(false)}
-                            >
-                                {modalContent.stats.status === 'has_data' ? 'View Details' : 'Get Started'}
-                            </Link>
-                            <button 
-                                onClick={() => setShowActionModal(false)}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-    */
 
     if (loading) return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 flex items-center justify-center">
@@ -675,6 +522,139 @@ const CustomerDetail = () => {
                 })()}
             </div>
 
+            {/* Additional Business Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {/* Sales Representative Action */}
+                <div className="group bg-gradient-to-br from-cyan-50 to-cyan-100 hover:from-cyan-100 hover:to-cyan-200 border border-cyan-200 hover:border-cyan-300 rounded-lg p-4 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5">
+                    <Link 
+                        to={customer.salesRepEmployeeNumber?.id ? `/employees/${customer.salesRepEmployeeNumber.id}` : '/employees'}
+                        className="block"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+                                <FaUser className="text-white text-sm" />
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-lg font-bold text-cyan-800">
+                                        {customer.salesRepEmployeeNumber?.id ? 'Sales Representative' : 'Assign Sales Rep'}
+                                    </h3>
+                                    {!customer.salesRepEmployeeNumber?.id && (
+                                        <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full font-semibold">
+                                            Unassigned
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-sm font-medium text-cyan-600">
+                                    {customer.salesRepEmployeeNumber?.id 
+                                        ? `Employee ID: ${customer.salesRepEmployeeNumber.id}` 
+                                        : 'No sales representative assigned yet'}
+                                </p>
+                                <div className="flex items-center gap-1 mt-1">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                        customer.salesRepEmployeeNumber?.id ? 'bg-green-400' : 'bg-orange-400'
+                                    }`}></div>
+                                    <span className="text-xs text-gray-500">
+                                        {customer.salesRepEmployeeNumber?.id ? 'Contact assigned rep' : 'Needs assignment'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="text-cyan-400 group-hover:text-cyan-600 transition-colors duration-200">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
+                {/* Products & Recommendations */}
+                <div className="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border border-purple-200 hover:border-purple-300 rounded-lg p-4 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5">
+                    <Link 
+                        to="/products"
+                        className="block"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-lg font-bold text-purple-800">Product Catalog</h3>
+                                    {customerStats.totalOrders > 0 && (
+                                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-semibold">
+                                            Recommendations
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-sm font-medium text-purple-600">
+                                    {customerStats.totalOrders > 0 
+                                        ? 'View products and get recommendations' 
+                                        : 'Browse product catalog for first order'}
+                                </p>
+                                <div className="flex items-center gap-1 mt-1">
+                                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                                    <span className="text-xs text-gray-500">
+                                        {customerStats.totalOrders > 0 ? 'Based on order history' : 'Full catalog available'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="text-purple-400 group-hover:text-purple-600 transition-colors duration-200">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
+                {/* Quick Order Creation */}
+                <div className="group bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 border border-emerald-200 hover:border-emerald-300 rounded-lg p-4 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5">
+                    <Link 
+                        to={`/orders?customer=${customerId}`}
+                        className="block"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-lg font-bold text-emerald-800">Create New Order</h3>
+                                    {customerStats.totalOrders === 0 && (
+                                        <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-semibold">
+                                            First Order
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-sm font-medium text-emerald-600">
+                                    {customerStats.totalOrders === 0 
+                                        ? 'Start building customer relationship' 
+                                        : 'Quick order creation with customer details'}
+                                </p>
+                                <div className="flex items-center gap-1 mt-1">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                        customerStats.totalOrders === 0 ? 'bg-yellow-400' : 'bg-green-400'
+                                    }`}></div>
+                                    <span className="text-xs text-gray-500">
+                                        {customerStats.totalOrders === 0 ? 'Start customer journey' : 'Quick order process'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="text-emerald-400 group-hover:text-emerald-600 transition-colors duration-200">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+            </div>
+
             {/* Business Intelligence Panel */}
             {(() => {
                 const insights = getBusinessInsights();
@@ -783,6 +763,202 @@ const CustomerDetail = () => {
                              customerStats.totalOrders > 3 ? 'Regular customer' :
                              'New customer'}
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Customer Relationship Health & Action Plan */}
+            <div className="mt-6 bg-white rounded-lg shadow-md border border-gray-100 p-4">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-lg font-bold text-gray-800">Relationship Health & Action Plan</h2>
+                    <div className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        getBusinessInsights().riskLevel === 'low' ? 'bg-green-100 text-green-700' :
+                        getBusinessInsights().riskLevel === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                    }`}>
+                        {(() => {
+                            const insights = getBusinessInsights();
+                            if (insights.riskLevel === 'low') return 'HEALTHY';
+                            if (insights.riskLevel === 'medium') return 'MODERATE';
+                            return 'NEEDS ATTENTION';
+                        })()}
+                    </div>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Relationship Metrics */}
+                    <div className="space-y-4">
+                        <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
+                            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Relationship Metrics
+                        </h3>
+                        
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Customer Lifecycle Stage</span>
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                    customerStats.totalOrders === 0 ? 'bg-blue-100 text-blue-700' :
+                                    customerStats.totalOrders <= 3 ? 'bg-green-100 text-green-700' :
+                                    customerStats.totalOrders <= 10 ? 'bg-purple-100 text-purple-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                    {customerStats.totalOrders === 0 ? 'Prospect' :
+                                     customerStats.totalOrders <= 3 ? 'New Customer' :
+                                     customerStats.totalOrders <= 10 ? 'Regular Customer' :
+                                     'VIP Customer'}
+                                </span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Payment Reliability</span>
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                    customerStats.totalPayments === 0 ? 'bg-red-100 text-red-700' :
+                                    customerStats.totalPayments / Math.max(customerStats.totalOrders, 1) >= 0.8 ? 'bg-green-100 text-green-700' :
+                                    'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                    {customerStats.totalPayments === 0 ? 'No Payment Data' :
+                                     customerStats.totalPayments / Math.max(customerStats.totalOrders, 1) >= 0.8 ? 'Excellent' :
+                                     'Needs Improvement'}
+                                </span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Communication Status</span>
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                    customer.salesRepEmployeeNumber?.id ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                                }`}>
+                                    {customer.salesRepEmployeeNumber?.id ? 'Assigned Rep' : 'Needs Assignment'}
+                                </span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Credit Utilization Health</span>
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                    getCreditUtilization() <= 30 ? 'bg-green-100 text-green-700' :
+                                    getCreditUtilization() <= 70 ? 'bg-yellow-100 text-yellow-700' :
+                                    'bg-red-100 text-red-700'
+                                }`}>
+                                    {getCreditUtilization() <= 30 ? 'Conservative' :
+                                     getCreditUtilization() <= 70 ? 'Moderate' :
+                                     'High Risk'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Action Items & Recommendations */}
+                    <div className="space-y-4">
+                        <h3 className="text-md font-semibold text-gray-800 flex items-center gap-2">
+                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Recommended Actions
+                        </h3>
+                        
+                        <div className="space-y-3">
+                            {(() => {
+                                const actions = [];
+                                
+                                // Priority actions based on customer state
+                                if (customerStats.totalOrders === 0) {
+                                    actions.push({
+                                        priority: 'high',
+                                        action: 'Schedule discovery call to understand customer needs',
+                                        icon: '📞',
+                                        timeline: 'This week'
+                                    });
+                                    actions.push({
+                                        priority: 'high',
+                                        action: 'Send product catalog and pricing information',
+                                        icon: '📧',
+                                        timeline: 'Next 2 days'
+                                    });
+                                }
+                                
+                                if (!customer.salesRepEmployeeNumber?.id) {
+                                    actions.push({
+                                        priority: 'medium',
+                                        action: 'Assign dedicated sales representative',
+                                        icon: '👥',
+                                        timeline: 'This week'
+                                    });
+                                }
+                                
+                                if (customerStats.totalPayments === 0 && customerStats.totalOrders > 0) {
+                                    actions.push({
+                                        priority: 'high',
+                                        action: 'Follow up on outstanding payments',
+                                        icon: '💰',
+                                        timeline: 'Urgent'
+                                    });
+                                }
+                                
+                                if (customerStats.lastOrderDate) {
+                                    const daysSinceLastOrder = Math.floor(
+                                        (new Date() - new Date(customerStats.lastOrderDate)) / (1000 * 60 * 60 * 24)
+                                    );
+                                    if (daysSinceLastOrder > 90) {
+                                        actions.push({
+                                            priority: 'medium',
+                                            action: 'Re-engagement campaign - check satisfaction',
+                                            icon: '🔄',
+                                            timeline: 'This month'
+                                        });
+                                    }
+                                }
+                                
+                                if (getCreditUtilization() > 80) {
+                                    actions.push({
+                                        priority: 'medium',
+                                        action: 'Review credit limit increase opportunity',
+                                        icon: '📈',
+                                        timeline: 'Next review cycle'
+                                    });
+                                }
+                                
+                                // Default actions if none specific
+                                if (actions.length === 0) {
+                                    actions.push({
+                                        priority: 'low',
+                                        action: 'Schedule regular check-in call',
+                                        icon: '✅',
+                                        timeline: 'Monthly'
+                                    });
+                                    actions.push({
+                                        priority: 'low',
+                                        action: 'Review upselling opportunities',
+                                        icon: '🎯',
+                                        timeline: 'Quarterly'
+                                    });
+                                }
+                                
+                                return actions.map((item, index) => (
+                                    <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                        <div className="text-lg">{item.icon}</div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="text-sm font-medium text-gray-800">{item.action}</p>
+                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                                    item.priority === 'high' ? 'bg-red-100 text-red-700' :
+                                                    item.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                    'bg-green-100 text-green-700'
+                                                }`}>
+                                                    {item.priority.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500">Timeline: {item.timeline}</p>
+                                        </div>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
                     </div>
                 </div>
             </div>
