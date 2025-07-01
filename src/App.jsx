@@ -22,22 +22,17 @@ const App = () => {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
-        
-        {/* Customer routes */}
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/:customerId" element={<CustomerDetail />} />
         <Route path="/customers/:customerId/edit" element={<CustomerEdit />} />
         <Route path="/customers/:customerId/orders" element={<CustomerOrders />} />
         <Route path="/customers/:customerId/payments" element={<CustomerPayments />} />
-        
-        {/* Other entity routes */}
         <Route path="/employees" element={<Employees />} />
         <Route path="/offices" element={<Offices />} />
         <Route path="/orders" element={<Orders />} />
+        {/* <Route path="/Navbar" element={<Navbar />} /> */}
         <Route path="/payments" element={<Payments />} />
         <Route path="/products" element={<Products />} />
-        
-        {/* Legacy routes */}
         <Route path="/product" element={<ProductCard />} />
         <Route path="/order" element={<OrderCard />} />
         <Route path="*" element={<NotFound />} />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaArrowLeft, FaBuilding, FaCalendarAlt, FaChartLine, FaCheckCircle, FaClipboardList, FaClock, FaCreditCard, FaDollarSign, FaEdit, FaEnvelope, FaExclamationTriangle, FaInfoCircle, FaMapMarkerAlt, FaPhone, FaShoppingCart, FaTimes, FaTrash, FaUser } from 'react-icons/fa';
+import { FaArrowLeft, FaBuilding, FaCalendarAlt, FaChartLine, FaCheckCircle, FaClipboardList, FaClock, FaCreditCard, FaDollarSign, FaEdit, FaEnvelope, FaExclamationTriangle, FaMapMarkerAlt, FaPhone, FaShoppingCart, FaTrash, FaUser } from 'react-icons/fa';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const CustomerDetail = () => {
@@ -15,8 +15,8 @@ const CustomerDetail = () => {
         lastPaymentDate: null,
         accountStatus: 'Active'
     });
-    const [showActionModal, setShowActionModal] = useState(false);
-    const [modalContent, setModalContent] = useState(null);
+    // const [showActionModal, setShowActionModal] = useState(false); // For future modal functionality
+    // const [modalContent, setModalContent] = useState(null); // For future modal functionality
 
     useEffect(() => {
         const fetchData = async () => {
@@ -152,37 +152,39 @@ const CustomerDetail = () => {
         };
     };
 
-    // Enhanced action handlers
-    const handleActionPreview = (actionType) => {
-        const ordersLogic = getOrdersButtonLogic();
-        const paymentsLogic = getPaymentsButtonLogic();
+    // Enhanced action handlers - Function for potential future modal functionality
+    // const handleActionPreview = (actionType) => {
+    //     const ordersLogic = getOrdersButtonLogic();
+    //     const paymentsLogic = getPaymentsButtonLogic();
 
-        if (actionType === 'orders') {
-            setModalContent({
-                type: 'orders',
-                title: ordersLogic.actionText,
-                data: ordersLogic,
-                stats: {
-                    total: customerStats.totalOrders,
-                    lastDate: customerStats.lastOrderDate,
-                    status: ordersLogic.hasData ? 'has_data' : 'no_data'
-                }
-            });
-        } else if (actionType === 'payments') {
-            setModalContent({
-                type: 'payments',
-                title: paymentsLogic.actionText,
-                data: paymentsLogic,
-                stats: {
-                    total: customerStats.totalPayments,
-                    lastDate: customerStats.lastPaymentDate,
-                    status: paymentsLogic.hasData ? 'has_data' : 'no_data'
-                }
-            });
-        }
-        setShowActionModal(true);
-    };
+    //     if (actionType === 'orders') {
+    //         setModalContent({
+    //             type: 'orders',
+    //             title: ordersLogic.actionText,
+    //             data: ordersLogic,
+    //             stats: {
+    //                 total: customerStats.totalOrders,
+    //                 lastDate: customerStats.lastOrderDate,
+    //                 status: ordersLogic.hasData ? 'has_data' : 'no_data'
+    //             }
+    //         });
+    //     } else if (actionType === 'payments') {
+    //         setModalContent({
+    //             type: 'payments',
+    //             title: paymentsLogic.actionText,
+    //             data: paymentsLogic,
+    //             stats: {
+    //                 total: customerStats.totalPayments,
+    //                 lastDate: customerStats.lastPaymentDate,
+    //                 status: paymentsLogic.hasData ? 'has_data' : 'no_data'
+    //             }
+    //         });
+    //     }
+    //     setShowActionModal(true);
+    // };
 
+    // Action Preview Modal - For future functionality
+    /*
     const ActionPreviewModal = () => {
         if (!showActionModal || !modalContent) return null;
 
@@ -300,6 +302,7 @@ const CustomerDetail = () => {
             </div>
         );
     };
+    */
 
     if (loading) return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 flex items-center justify-center">
