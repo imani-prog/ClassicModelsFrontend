@@ -37,6 +37,7 @@ const CustomerDetail = () => {
                     const customerOrders = ordersData.filter(order => 
                         String(order.customerNumber?.id || order.customerNumber) === String(customerId)
                     );
+                    
 
                     // Process payments for this customer
                     const customerPayments = paymentsData
