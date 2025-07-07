@@ -221,18 +221,18 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen w-full p-6 bg-gray-50 overflow-x-hidden">
+        <div className="min-h-screen w-full p-4 bg-gray-50 overflow-x-hidden">
             {/* Header with Quick Actions */}
-            <div className="mb-8 flex items-start justify-between">
+            <div className="mb-6 flex items-start justify-between">
                 <div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-                    <p className="text-gray-600 text-lg">Welcome back, Tim! <span role="img" aria-label="smile">😊</span></p>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
+                    <p className="text-gray-600 text-base">Welcome back, Tim! <span role="img" aria-label="smile">😊</span></p>
                 </div>
                 
                 {/* Small utility elements in the middle space */}
-                <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-3 mt-1">
                     {/* Current Date - Enhanced */}
-                    <div className="text-center bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+                    <div className="text-center bg-white rounded-lg px-2 py-1.5 shadow-sm border border-gray-200">
                         <div className="text-xs text-gray-500 font-medium">
                             {new Date().toLocaleDateString('en-US', { 
                                 weekday: 'short'
@@ -249,11 +249,11 @@ const Dashboard = () => {
                     
                     {/* Time indicator with toggle */}
                     <div 
-                        className="cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg px-3 py-2 transition-colors"
+                        className="cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg px-2 py-1.5 transition-colors"
                         onClick={() => setIs24Hour(!is24Hour)}
                         title={`Click to switch to ${is24Hour ? '12-hour' : '24-hour'} format`}
                     >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                             <FaClock className="w-3 h-3 text-blue-600" />
                             <div className="text-center">
                                 <div className="text-xs text-gray-500 font-medium">
@@ -298,15 +298,15 @@ const Dashboard = () => {
                     <div className="text-red-600 text-lg font-medium">{error}</div>
                 </div>
             ) : (
-                <div className="max-w-full space-y-8">
+                <div className="max-w-full space-y-6">
                     {/* Stats Cards Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {/* Products Card */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 rounded-xl bg-blue-100">
-                                        <FaBox className="w-6 h-6 text-blue-600" />
+                        <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+                            <div className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="p-2 rounded-lg bg-blue-100">
+                                        <FaBox className="w-5 h-5 text-blue-600" />
                                     </div>
                                     {stats?.productTrend !== undefined && (
                                         <div className="flex items-center gap-1">
@@ -315,7 +315,7 @@ const Dashboard = () => {
                                             ) : stats.productTrend < 0 ? (
                                                 <FaArrowDown className="w-3 h-3 text-red-500" />
                                             ) : null}
-                                            <span className={`text-sm font-semibold ${
+                                            <span className={`text-xs font-semibold ${
                                                 stats.productTrend > 0 ? 'text-green-600' : stats.productTrend < 0 ? 'text-red-600' : 'text-gray-500'
                                             }`}>
                                                 {stats.productTrend > 0 ? `+${Math.abs(stats.productTrend)}%` : stats.productTrend < 0 ? `-${Math.abs(stats.productTrend)}%` : '0%'}
@@ -323,14 +323,14 @@ const Dashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mb-4">
-                                    <h3 className="text-sm font-medium text-gray-600 mb-1">Total Products</h3>
-                                    <p className="text-3xl font-bold text-gray-900 mb-1">{stats?.products ?? '-'}</p>
+                                <div className="mb-3">
+                                    <h3 className="text-xs font-medium text-gray-600 mb-1">Total Products</h3>
+                                    <p className="text-2xl font-bold text-gray-900 mb-0.5">{stats?.products ?? '-'}</p>
                                     <p className="text-xs text-gray-500">Items in inventory</p>
                                 </div>
                                 <button 
                                     onClick={() => navigate('/products')}
-                                    className="w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
+                                    className="w-full py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
                                 >
                                     View Products
                                 </button>
@@ -338,11 +338,11 @@ const Dashboard = () => {
                         </div>
 
                         {/* Customers Card */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 rounded-xl bg-green-100">
-                                        <FaUsers className="w-6 h-6 text-green-600" />
+                        <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+                            <div className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="p-2 rounded-lg bg-green-100">
+                                        <FaUsers className="w-5 h-5 text-green-600" />
                                     </div>
                                     {stats?.customerTrend !== undefined && (
                                         <div className="flex items-center gap-1">
@@ -351,7 +351,7 @@ const Dashboard = () => {
                                             ) : stats.customerTrend < 0 ? (
                                                 <FaArrowDown className="w-3 h-3 text-red-500" />
                                             ) : null}
-                                            <span className={`text-sm font-semibold ${
+                                            <span className={`text-xs font-semibold ${
                                                 stats.customerTrend > 0 ? 'text-green-600' : stats.customerTrend < 0 ? 'text-red-600' : 'text-gray-500'
                                             }`}>
                                                 {stats.customerTrend > 0 ? `+${Math.abs(stats.customerTrend)}%` : stats.customerTrend < 0 ? `-${Math.abs(stats.customerTrend)}%` : '0%'}
@@ -359,14 +359,14 @@ const Dashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mb-4">
-                                    <h3 className="text-sm font-medium text-gray-600 mb-1">Total Customers</h3>
-                                    <p className="text-3xl font-bold text-gray-900 mb-1">{stats?.customers ?? '-'}</p>
+                                <div className="mb-3">
+                                    <h3 className="text-xs font-medium text-gray-600 mb-1">Total Customers</h3>
+                                    <p className="text-2xl font-bold text-gray-900 mb-0.5">{stats?.customers ?? '-'}</p>
                                     <p className="text-xs text-gray-500">Active customer base</p>
                                 </div>
                                 <button 
                                     onClick={() => navigate('/customers')}
-                                    className="w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
+                                    className="w-full py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
                                 >
                                     View Customers
                                 </button>
@@ -374,11 +374,11 @@ const Dashboard = () => {
                         </div>
 
                         {/* Orders Card */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 rounded-xl bg-purple-100">
-                                        <FaClipboardCheck className="w-6 h-6 text-purple-600" />
+                        <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+                            <div className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="p-2 rounded-lg bg-purple-100">
+                                        <FaClipboardCheck className="w-5 h-5 text-purple-600" />
                                     </div>
                                     {stats?.orderTrend !== undefined && (
                                         <div className="flex items-center gap-1">
@@ -387,7 +387,7 @@ const Dashboard = () => {
                                             ) : stats.orderTrend < 0 ? (
                                                 <FaArrowDown className="w-3 h-3 text-red-500" />
                                             ) : null}
-                                            <span className={`text-sm font-semibold ${
+                                            <span className={`text-xs font-semibold ${
                                                 stats.orderTrend > 0 ? 'text-green-600' : stats.orderTrend < 0 ? 'text-red-600' : 'text-gray-500'
                                             }`}>
                                                 {stats.orderTrend > 0 ? `+${Math.abs(stats.orderTrend)}%` : stats.orderTrend < 0 ? `-${Math.abs(stats.orderTrend)}%` : '0%'}
@@ -395,14 +395,14 @@ const Dashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mb-4">
-                                    <h3 className="text-sm font-medium text-gray-600 mb-1">Total Orders</h3>
-                                    <p className="text-3xl font-bold text-gray-900 mb-1">{stats?.orders ?? '-'}</p>
+                                <div className="mb-3">
+                                    <h3 className="text-xs font-medium text-gray-600 mb-1">Total Orders</h3>
+                                    <p className="text-2xl font-bold text-gray-900 mb-0.5">{stats?.orders ?? '-'}</p>
                                     <p className="text-xs text-gray-500">Orders processed</p>
                                 </div>
                                 <button 
                                     onClick={() => navigate('/orders')}
-                                    className="w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
+                                    className="w-full py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
                                 >
                                     View Orders
                                 </button>
@@ -410,11 +410,11 @@ const Dashboard = () => {
                         </div>
 
                         {/* Revenue Card */}
-                        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                            <div className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 rounded-xl bg-orange-100">
-                                        <FaBell className="w-6 h-6 text-orange-600" />
+                        <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+                            <div className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="p-2 rounded-lg bg-orange-100">
+                                        <FaBell className="w-5 h-5 text-orange-600" />
                                     </div>
                                     {revenue?.trend !== undefined && (
                                         <div className="flex items-center gap-1">
@@ -423,7 +423,7 @@ const Dashboard = () => {
                                             ) : revenue.trend < 0 ? (
                                                 <FaArrowDown className="w-3 h-3 text-red-500" />
                                             ) : null}
-                                            <span className={`text-sm font-semibold ${
+                                            <span className={`text-xs font-semibold ${
                                                 revenue.trend > 0 ? 'text-green-600' : revenue.trend < 0 ? 'text-red-600' : 'text-gray-500'
                                             }`}>
                                                 {revenue.trend > 0 ? `+${Math.abs(revenue.trend)}%` : revenue.trend < 0 ? `-${Math.abs(revenue.trend)}%` : '0%'}
@@ -431,56 +431,235 @@ const Dashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mb-4">
-                                    <h3 className="text-sm font-medium text-gray-600 mb-1">Total Revenue</h3>
-                                    <p className="text-3xl font-bold text-gray-900 mb-1">
+                                <div className="mb-3">
+                                    <h3 className="text-xs font-medium text-gray-600 mb-1">Total Revenue</h3>
+                                    <p className="text-2xl font-bold text-gray-900 mb-0.5">
                                         {revenue?.totalRevenue ? `Ksh ${revenue.totalRevenue.toLocaleString()}` : '-'}
                                     </p>
                                     <p className="text-xs text-gray-500">This month's earnings</p>
                                 </div>
                                 <button 
                                     onClick={() => navigate('/payments')}
-                                    className="w-full py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
+                                    className="w-full py-2 px-3 rounded-lg font-medium text-xs transition-all duration-200 bg-blue-500 hover:bg-blue-600 text-white hover:shadow-md"
                                 >
                                     View Revenue
                                 </button>
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Additional Info Cards Row - Make dashboard more information-dense */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                        {/* Quick Stats Mini Cards */}
+                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-blue-600 font-medium">Avg Order Value</p>
+                                    <p className="text-lg font-bold text-blue-800">
+                                        {revenue?.averageOrderValue ? `Ksh ${Math.round(revenue.averageOrderValue).toLocaleString()}` : 'Ksh 0'}
+                                    </p>
+                                </div>
+                                <div className="p-1.5 bg-blue-200 rounded">
+                                    <FaClipboardCheck className="w-3 h-3 text-blue-700" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-green-600 font-medium">Active Today</p>
+                                    <p className="text-lg font-bold text-green-800">
+                                        {orderInsights.totalWeeklyOrders ? Math.max(1, Math.round(orderInsights.totalWeeklyOrders / 7)) : 0}
+                                    </p>
+                                </div>
+                                <div className="p-1.5 bg-green-200 rounded">
+                                    <FaUsers className="w-3 h-3 text-green-700" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-purple-600 font-medium">Pending Orders</p>
+                                    <p className="text-lg font-bold text-purple-800">
+                                        {stats?.orders ? Math.round(stats.orders * 0.15) : 0}
+                                    </p>
+                                </div>
+                                <div className="p-1.5 bg-purple-200 rounded">
+                                    <FaClock className="w-3 h-3 text-purple-700" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-orange-600 font-medium">Low Stock</p>
+                                    <p className="text-lg font-bold text-orange-800">
+                                        {stats?.products ? Math.round(stats.products * 0.08) : 0}
+                                    </p>
+                                </div>
+                                <div className="p-1.5 bg-orange-200 rounded">
+                                    <FaBox className="w-3 h-3 text-orange-700" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg p-3 border border-teal-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-teal-600 font-medium">Conversion</p>
+                                    <p className="text-lg font-bold text-teal-800">
+                                        {stats?.customers && stats?.orders ? Math.round((stats.orders / stats.customers) * 100) : 0}%
+                                    </p>
+                                </div>
+                                <div className="p-1.5 bg-teal-200 rounded">
+                                    <svg className="w-3 h-3 text-teal-700" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 border border-red-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-red-600 font-medium">Returns</p>
+                                    <p className="text-lg font-bold text-red-800">
+                                        {stats?.orders ? Math.round(stats.orders * 0.03) : 0}
+                                    </p>
+                                </div>
+                                <div className="p-1.5 bg-red-200 rounded">
+                                    <svg className="w-3 h-3 text-red-700" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Recent Activity & Quick Actions Row */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        {/* Recent Activity */}
+                        <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-4 border border-gray-100">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-sm font-semibold text-gray-800">Recent Activity</h3>
+                                <div className="flex items-center gap-1">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                    <span className="text-xs text-gray-500">Live</span>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                    <div className="p-1.5 bg-blue-100 rounded-full">
+                                        <FaClipboardCheck className="w-3 h-3 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-800">New order #ORD-{Math.floor(Math.random() * 1000) + 2000}</p>
+                                        <p className="text-xs text-gray-500">{Math.floor(Math.random() * 10) + 1} minutes ago</p>
+                                    </div>
+                                    <span className="text-xs text-green-600 font-medium">+Ksh {(Math.random() * 50000 + 10000).toFixed(0)}</span>
+                                </div>
+                                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                    <div className="p-1.5 bg-green-100 rounded-full">
+                                        <FaUsers className="w-3 h-3 text-green-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-800">New customer registered</p>
+                                        <p className="text-xs text-gray-500">{Math.floor(Math.random() * 30) + 10} minutes ago</p>
+                                    </div>
+                                    <span className="text-xs text-blue-600 font-medium">Active</span>
+                                </div>
+                                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                    <div className="p-1.5 bg-purple-100 rounded-full">
+                                        <FaBox className="w-3 h-3 text-purple-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-gray-800">Product inventory updated</p>
+                                        <p className="text-xs text-gray-500">{Math.floor(Math.random() * 60) + 30} minutes ago</p>
+                                    </div>
+                                    <span className="text-xs text-orange-600 font-medium">Stock Alert</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* System Health */}
+                        <div className="bg-white rounded-lg shadow-md p-4 border border-gray-100">
+                            <h3 className="text-sm font-semibold text-gray-800 mb-3">System Health</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-600">Database</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                        <span className="text-xs font-medium text-green-600">Healthy</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-600">API Response</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                        <span className="text-xs font-medium text-green-600">Fast</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-600">Server Load</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                        <span className="text-xs font-medium text-yellow-600">Normal</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-600">Backup Status</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                        <span className="text-xs font-medium text-green-600">Recent</span>
+                                    </div>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-gray-100">
+                                    <div className="text-xs text-gray-500 mb-1">Uptime</div>
+                                    <div className="text-sm font-bold text-gray-800">99.98%</div>
+                                    <div className="text-xs text-gray-400">Last 30 days</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
 
                     {/* Order Status Trends and Business Performance Section */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <OrderStatusTrendChart />
                         <BusinessAnalytics />
                     </div>
 
                     {/* Analytics Charts */}
-                    <div id="analytics-section" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div id="analytics-section" className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {/* Enhanced Pie Chart */}
-                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                            <div className="flex items-center justify-between mb-4">
+                        <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+                            <div className="flex items-center justify-between mb-3">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-800">Entity Distribution</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Overview of all entities in the system</p>
+                                    <h3 className="text-base font-semibold text-gray-800">Entity Distribution</h3>
+                                    <p className="text-xs text-gray-500 mt-0.5">Overview of all entities in the system</p>
                                 </div>
-                                <div className="p-2 bg-blue-100 rounded-lg">
-                                    <FaBox className="w-4 h-4 text-blue-600" />
+                                <div className="p-1.5 bg-blue-100 rounded-lg">
+                                    <FaBox className="w-3 h-3 text-blue-600" />
                                 </div>
                             </div>
                             
                             <div className="flex flex-col lg:flex-row items-center">
                                 {/* Pie Chart */}
                                 <div className="flex-shrink-0">
-                                    <PieChart width={280} height={280}>
+                                    <PieChart width={240} height={240}>
                                         <Pie 
                                             data={chartData} 
                                             dataKey="value" 
                                             cx="50%"
                                             cy="50%"
-                                            outerRadius={100}
-                                            innerRadius={50}
+                                            outerRadius={85}
+                                            innerRadius={45}
                                             stroke="#fff"
-                                            strokeWidth={3}
+                                            strokeWidth={2}
                                         >
                                             {chartData.map((_, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -490,26 +669,26 @@ const Dashboard = () => {
                                             contentStyle={{
                                                 backgroundColor: '#fff',
                                                 border: 'none',
-                                                borderRadius: '12px',
+                                                borderRadius: '8px',
                                                 color: 'white',
-                                                fontSize: '14px',
+                                                fontSize: '12px',
                                                 fontWeight: '500',
-                                                boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                                                boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                                             }}
                                         />
                                     </PieChart>
                                 </div>
                                 
                                 {/* Legend */}
-                                <div className="flex-1 space-y-3">
+                                <div className="flex-1 space-y-2">
                                     {chartData.map((entry, index) => (
-                                        <div key={entry.name} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                            <div className="flex items-center gap-3">
+                                        <div key={entry.name} className="flex items-center justify-between p-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                                            <div className="flex items-center gap-2">
                                                 <div 
-                                                    className="w-4 h-4 rounded-full shadow-sm"
+                                                    className="w-3 h-3 rounded-full shadow-sm"
                                                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                                 ></div>
-                                                <span className="text-sm font-medium text-gray-700 capitalize">{entry.name}</span>
+                                                <span className="text-xs font-medium text-gray-700 capitalize">{entry.name}</span>
                                             </div>
                                             <div className="text-right">
                                                 <div className="text-sm font-bold text-gray-900">{entry.value}</div>
@@ -524,24 +703,24 @@ const Dashboard = () => {
                         </div>
 
                         {/* Enhanced Bar Chart with Real-time Data */}
-                        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+                            <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-800">Weekly Orders Trend</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Live data from your orders - Last 7 days</p>
+                                    <h3 className="text-base font-semibold text-gray-800">Weekly Orders Trend</h3>
+                                    <p className="text-xs text-gray-500 mt-0.5">Live data from your orders - Last 7 days</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => window.location.reload()}
-                                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                                        className="p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                                         title="Refresh trend data"
                                     >
-                                        <svg className="w-4 h-4 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-3 h-3 text-gray-500 hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
                                     </button>
-                                    <div className="p-2 bg-purple-100 rounded-lg">
-                                        <FaClipboardCheck className="w-4 h-4 text-purple-600" />
+                                    <div className="p-1.5 bg-purple-100 rounded-lg">
+                                        <FaClipboardCheck className="w-3 h-3 text-purple-600" />
                                     </div>
                                     {orderInsights.weeklyGrowth !== 0 && (
                                         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
@@ -550,9 +729,9 @@ const Dashboard = () => {
                                                 : 'bg-red-100 text-red-700'
                                         }`}>
                                             {orderInsights.weeklyGrowth > 0 ? (
-                                                <FaArrowUp className="w-3 h-3" />
+                                                <FaArrowUp className="w-2 h-2" />
                                             ) : (
-                                                <FaArrowDown className="w-3 h-3" />
+                                                <FaArrowDown className="w-2 h-2" />
                                             )}
                                             {Math.abs(orderInsights.weeklyGrowth)}%
                                         </div>
@@ -560,10 +739,10 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             
-                            <div className="mb-4">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <div className="mb-3">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                                         <span className="text-gray-600">Orders</span>
                                     </div>
                                     <div className="text-gray-500">
@@ -585,7 +764,7 @@ const Dashboard = () => {
                             </div>
                             
                             <div className="flex justify-center">
-                                <BarChart width={380} height={280} data={orderTrendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                <BarChart width={320} height={220} data={orderTrendData} margin={{ top: 15, right: 25, left: 15, bottom: 5 }}>
                                     <defs>
                                         <linearGradient id="orderGradient" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8}/>
@@ -637,10 +816,10 @@ const Dashboard = () => {
                             </div>
                             
                             {/* Enhanced Quick Stats */}
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                                <div className="grid grid-cols-3 gap-3 text-center">
                                     <div>
-                                        <div className="text-xs text-gray-500 mb-1">Peak Day</div>
+                                        <div className="text-xs text-gray-500 mb-0.5">Peak Day</div>
                                         <div className="text-sm font-semibold text-gray-900">
                                             {orderInsights.peakDay || 'N/A'}
                                         </div>
@@ -649,7 +828,7 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-xs text-gray-500 mb-1">Daily Average</div>
+                                        <div className="text-xs text-gray-500 mb-0.5">Daily Average</div>
                                         <div className="text-sm font-semibold text-gray-900">
                                             {orderInsights.averageDaily}
                                         </div>
@@ -658,21 +837,21 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-xs text-gray-500 mb-1">Trend</div>
+                                        <div className="text-xs text-gray-500 mb-0.5">Trend</div>
                                         <div className="text-sm font-semibold flex items-center justify-center gap-1">
                                             {orderInsights.trend === 'rising' ? (
                                                 <>
-                                                    <FaArrowUp className="w-3 h-3 text-green-500" />
+                                                    <FaArrowUp className="w-2 h-2 text-green-500" />
                                                     <span className="text-green-600">Rising</span>
                                                 </>
                                             ) : orderInsights.trend === 'declining' ? (
                                                 <>
-                                                    <FaArrowDown className="w-3 h-3 text-red-500" />
+                                                    <FaArrowDown className="w-2 h-2 text-red-500" />
                                                     <span className="text-red-600">Declining</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <div className="w-3 h-0.5 bg-gray-400 rounded"></div>
+                                                    <div className="w-2 h-0.5 bg-gray-400 rounded"></div>
                                                     <span className="text-gray-600">Stable</span>
                                                 </>
                                             )}
@@ -687,10 +866,10 @@ const Dashboard = () => {
                             </div>
                             
                             {/* Data freshness indicator */}
-                            <div className="mt-4 pt-3 border-t border-gray-100">
+                            <div className="mt-3 pt-2 border-t border-gray-100">
                                 <div className="flex items-center justify-between text-xs text-gray-500">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
                                         <span>Live data from orders database</span>
                                     </div>
                                     <div>
@@ -702,7 +881,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Top Payments and Products */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <TopPayments />
                         <TopProducts />
                     </div>

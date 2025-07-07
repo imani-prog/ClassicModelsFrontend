@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
-// Icons as simple SVG components
+// Icons SVG components
 const TrendingUp = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m3 17 6-6 4 4 8-8" />
@@ -66,7 +66,7 @@ const OrderStatusTrendChart = () => {
         const allDates = new Set();
         const trendMap = {};
 
-        // Step 1: Gather all available dates and normalize data
+        //Gather all available dates and normalize data
         data.forEach((entry) => {
           const date = entry.date;
           allDates.add(date);
@@ -79,19 +79,20 @@ const OrderStatusTrendChart = () => {
           };
         });
 
-        // Step 2: Ensure every date has all keys with consistent date formatting
-        const normalized = Array.from(allDates)
-          .sort()
-          .map((date) => {
-            const dateObj = new Date(date);
-            return {
-              date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              fullDate: date,
-              shipped: trendMap[date]?.shipped || 0,
-              completed: trendMap[date]?.completed || 0,
-              pending: trendMap[date]?.pending || 0,
-            };
-          });
+        //Sort dates and take only the last 7 days
+        const sortedDates = Array.from(allDates).sort();
+        const last7Days = sortedDates.slice(-7); // Get only the last 7 days
+        
+        const normalized = last7Days.map((date) => {
+          const dateObj = new Date(date);
+          return {
+            date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            fullDate: date,
+            shipped: trendMap[date]?.shipped || 0,
+            completed: trendMap[date]?.completed || 0,
+            pending: trendMap[date]?.pending || 0,
+          };
+        });
 
         // Calculate summary stats
         const totals = normalized.reduce((acc, day) => ({
@@ -100,9 +101,10 @@ const OrderStatusTrendChart = () => {
           pending: acc.pending + day.pending
         }), { shipped: 0, completed: 0, pending: 0 });
 
-        // Calculate trends (comparing last 3 days vs first 3 days)
-        const firstHalf = normalized.slice(0, 3);
-        const secondHalf = normalized.slice(-3);
+        // Calculate trends
+        const dataLength = normalized.length;
+        const firstHalf = normalized.slice(0, Math.floor(dataLength / 2));
+        const secondHalf = normalized.slice(-Math.floor(dataLength / 2));
         
         const firstHalfTotals = firstHalf.reduce((acc, day) => ({
           shipped: acc.shipped + day.shipped,
@@ -140,7 +142,7 @@ const OrderStatusTrendChart = () => {
     };
 
     fetchData();
-  }, []); // Empty dependency array to run only once
+  }, []);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -165,7 +167,7 @@ const OrderStatusTrendChart = () => {
     return null;
   };
 
-  // eslint-disable-next-line no-unused-vars
+  
   const StatCard = ({ title, value, trend, icon: Icon, color }) => (
     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col space-y-3">
@@ -238,13 +240,13 @@ const OrderStatusTrendChart = () => {
             <span className="ml-3 text-gray-600">Loading chart...</span>
           </div>
         ) : (
-          <div style={{ width: '100%', height: 280 }}>
-            <ResponsiveContainer>
+          <div style={{ width: '100%', height: 320 }}>
+            <ResponsiveContainer width="100%" height="100%">
               <LineChart 
                 data={trendData}
-                margin={{ top: 15, right: 15, left: 5, bottom: 15 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
-                {/* ...existing defs, grid, axes, tooltip, legend, and lines... */}
+                {/*defs, grid, axes, tooltip, legend, and lines... */}
                 <defs>
                   <linearGradient id="shippedGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3}/>
@@ -278,6 +280,9 @@ const OrderStatusTrendChart = () => {
                   tick={{ fontSize: 11, fill: '#6B7280', fontWeight: '500' }}
                   dy={8}
                   interval={0}
+                  angle={0}
+                  textAnchor="middle"
+                  height={40}
                 />
                 
                 <YAxis 
@@ -286,7 +291,9 @@ const OrderStatusTrendChart = () => {
                   tickLine={false}
                   tick={{ fontSize: 11, fill: '#6B7280', fontWeight: '500' }}
                   dx={-8}
-                  domain={[0, 'dataMax + 1']}
+                  domain={[0, (dataMax) => Math.max(dataMax + 2, 5)]}
+                  tickCount={6}
+                  interval={0}
                 />
                 
                 <Tooltip content={<CustomTooltip />} />
@@ -395,7 +402,7 @@ const OrderStatusTrendChart = () => {
             <div className="flex justify-between items-center">
               <span className="text-xs text-blue-700">Avg Daily Orders:</span>
               <span className="text-sm font-bold text-blue-900">
-                {Math.round((summaryStats.shipped.total + summaryStats.completed.total + summaryStats.pending.total) / 7)}
+                {Math.round((summaryStats.shipped.total + summaryStats.completed.total + summaryStats.pending.total) / Math.min(trendData.length, 7))}
               </span>
             </div>
           </div>

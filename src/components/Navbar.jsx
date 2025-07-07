@@ -1,15 +1,15 @@
 import {
-    Bell,
-    ChevronDown,
-    MessageSquare,
-    Moon,
-    Search,
-    Settings,
-    Sun
+  Bell,
+  ChevronDown,
+  MessageSquare,
+  Moon,
+  Search,
+  Settings,
+  Sun
 } from 'lucide-react';
 import React, { useState } from 'react';
 
-const Navbar = () => {
+const Navbar = ({ isOpen }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
@@ -36,7 +36,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-60 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm z-50">
+    <nav className={`fixed top-0 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm z-50 transition-all duration-300 ${
+      isOpen ? 'left-60' : 'left-16'
+    }`}>
       <div className="flex items-center justify-between px-6 h-full">
         
         {/* Left Section - Search */}
