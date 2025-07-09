@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import {
-  FaBars,
-  FaBox,
-  FaBuilding,
-  FaClipboardCheck,
-  FaHome,
-  FaMoneyCheck,
-  FaUsers,
-  FaUserTie
+    FaBars,
+    FaBox,
+    FaBuilding,
+    FaClipboardCheck,
+    FaHome,
+    FaMoneyCheck,
+    FaUsers,
+    FaUserTie
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -21,7 +21,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   };
 
   const menuItems = [
-    { name: 'Home', icon: <FaHome />, path: '/' },
+    { name: 'Home', icon: <FaHome />, path: '/dashboard' },
     { name: 'Products', icon: <FaBox />, path: '/products' },
     { name: 'Customers', icon: <FaUsers />, path: '/customers' },
     { name: 'Orders', icon: <FaClipboardCheck />, path: '/orders' },

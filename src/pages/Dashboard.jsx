@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { FaArrowDown, FaArrowUp, FaBell, FaBox, FaClipboardCheck, FaClock, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
+
 import BusinessAnalytics from '../components/BusinessPerformanceMetrics';
+import CustomerCreditLimits from '../components/CustomerCreditLimits';
 import OrderStatusTrendChart from '../components/OrderStatusTrendChart';
 import QuickActions from '../components/QuickActions';
 import TopPayments from '../components/TopPayments';
 import TopProducts from '../components/TopProducts';
+import { dashboardAPI, dataAPI } from '../utils/axios';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA66CC', '#FF4444', '#33B5E5'];
 
@@ -42,8 +45,8 @@ const Dashboard = () => {
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         
         // Get the current week that includes today (Sunday to Saturday)
-        const todayDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const daysFromSunday = todayDayOfWeek; // How many days since last Sunday
+        const todayDayOfWeek = now.getDay();
+        const daysFromSunday = todayDayOfWeek;
         
         // Calculate Sunday of current week using local dates to avoid timezone issues
         const currentWeekSunday = new Date(now);
@@ -147,27 +150,41 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
+        console.log('🔍 Dashboard: Starting data fetch...');
         setLoading(true);
         Promise.all([
-            fetch('http://localhost:8081/api/dashboard/stats').then(res => res.json()),
-            fetch('http://localhost:8081/api/dashboard/entity-distribution').then(res => res.json()),
-            fetch('http://localhost:8081/orders').then(res => res.json()), // Fetch real orders data
-            fetch('http://localhost:8081/api/dashboard/revenue-summary').then(res => res.json()),
+            dashboardAPI.getStats(),
+            dashboardAPI.getEntityDistribution(),
+            dataAPI.getOrders(),
+            dashboardAPI.getRevenueSummary(),
         ])
         .then(([statsRes, chartRes, ordersRes, revenueRes]) => {
-            setStats(statsRes);
-            setChartData(chartRes);
+            console.log('✅ Dashboard: All API responses received');
+            console.log('📊 Stats Response:', statsRes.data);
+            console.log('📊 Chart Response:', chartRes.data);
+            console.log('📊 Orders Response:', ordersRes.data);
+            console.log('📊 Revenue Response:', revenueRes.data);
+            
+            setStats(statsRes.data);
+            setChartData(chartRes.data);
             
             // Process real orders data into trend format
-            const trendData = processOrderTrendData(ordersRes);
+            const trendData = processOrderTrendData(ordersRes.data);
             setOrderTrendData(trendData);
             
-            setRevenue(revenueRes);
+            setRevenue(revenueRes.data);
             setLoading(false);
+            
+            console.log('✅ Dashboard: All data set in state');
         })
         .catch((err) => {
-            console.error('Dashboard data loading error:', err);
-            setError('Failed to load dashboard data');
+            console.error('❌ Dashboard data loading error:', err);
+            console.error('❌ Error details:', {
+                message: err.message,
+                status: err.response?.status,
+                data: err.response?.data
+            });
+            setError(err.message || 'Failed to load dashboard data');
             setLoading(false);
         });
     }, []);
@@ -299,6 +316,8 @@ const Dashboard = () => {
                 </div>
             ) : (
                 <div className="max-w-full space-y-6">
+                   
+                    
                     {/* Stats Cards Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {/* Products Card */}
@@ -880,10 +899,11 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Top Payments and Products */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Top Payments, Products, and Recent Orders */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <TopPayments />
                         <TopProducts />
+                        <CustomerCreditLimits />
                     </div>
                 </div>
             )}

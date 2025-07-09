@@ -1,27 +1,58 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import OrderCard from './components/OrderCard'
 import ProductCard from './components/ProductCard'
+import ProtectedRoute from './components/ProtectedRoute'
+import { useAuth } from './contexts/AuthContext'
 import CustomerDetail from './pages/CustomerDetail'
 import CustomerOrders from './pages/CustomerOrders'
 import CustomerPayments from './pages/CustomerPayments'
 import Customers from './pages/Customers'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
+import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import Offices from './pages/Offices'
 import OrderDetail from './pages/OrderDetail'
 import Orders from './pages/Orders'
 import Payments from './pages/Payments'
 import Products from './pages/Products'
-// import Navbar from './components/Navbar'
+import SignUp from './pages/SignUp'
 
+const RootRedirect = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+};
 
 const App = () => {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
+      {/* Root path - redirect based on authentication */}
+      <Route path="/" element={<RootRedirect />} />
+      
+      {/* Authentication routes (no layout) */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      
+      {/* Protected routes with layout */}
+      <Route element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/:customerId" element={<CustomerDetail />} />
         <Route path="/customers/:customerId/orders" element={<CustomerOrders />} />
@@ -35,8 +66,10 @@ const App = () => {
         <Route path="/products" element={<Products />} />
         <Route path="/product" element={<ProductCard />} />
         <Route path="/order" element={<OrderCard />} />
-        <Route path="*" element={<NotFound />} />
       </Route>
+      
+      {/* Catch all route for 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
