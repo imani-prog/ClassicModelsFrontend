@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import shoppingImage from '../assets/shopping-login.jpg';
+import { useAuth } from '../contexts/AuthContext';
 import { debugLogin, testCurrentToken } from '../utils/authDebug';
-import TokenManager from '../utils/tokenManager';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +14,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth(); // Get login method from AuthContext
   
   const successMessage = location.state?.message;
 
@@ -104,20 +105,17 @@ const Login = () => {
       console.log('  Success:', success);
 
       if (success && token) {
-        // Store the token and user data using TokenManager
-        const tokenStored = TokenManager.setToken(token);
-        const userStored = TokenManager.setUser(user);
+        console.log('✅ Login successful, updating AuthContext...');
         
-        if (tokenStored && userStored) {
-          console.log('✅ Authentication data stored successfully');
-          
-          // Verify storage worked
-          testCurrentToken(); // Debug current state after storage
-          
-          navigate('/dashboard');
-        } else {
-          setError('Failed to store authentication data. Please try again.');
-        }
+        // Use AuthContext login method instead of directly storing in localStorage
+        login(user, token);
+        
+        console.log('✅ Authentication data stored via AuthContext');
+        
+        // Verify storage worked
+        testCurrentToken(); // Debug current state after storage
+        
+        navigate('/dashboard');
       } else {
         console.error('❌ Login failed - Success:', success, 'Token:', !!token);
         if (!token) {
@@ -137,7 +135,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side with image */}
-      <div className="hidden md:flex w-1/2 bg-gray-100 items-center justify-center">
+      <div className="hidden md:flex w-1/2 bg-gray-100 items-center justify-center ml-10">
         <img
           src={shoppingImage}
           alt="E-commerce illustration"
@@ -148,7 +146,7 @@ const Login = () => {
       {/* Right side with login form */}
       <div className="flex w-full md:w-1/2 items-center justify-center p-10 bg-white">
         <div className="w-full max-w-md space-y-6">
-          <h2 className="text-4xl font-bold text-gray-800">Welcome Back</h2>
+          <h2 className="text-4xl font-bold text-gray-800">Welcome Back 😂😂😎</h2>
           <p className="text-gray-600">Please enter your credentials to sign in.</p>
 
           {successMessage && (
@@ -171,7 +169,6 @@ const Login = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="you@example.com"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -184,7 +181,6 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="••••••••"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -216,18 +212,6 @@ const Login = () => {
               }`}
             >
               {isLoading ? 'Signing in...' : 'Login'}
-            </button>
-
-            {/* Debug button for development */}
-            <button
-              type="button"
-              onClick={() => {
-                console.log('🔍 Manual debug check...');
-                testCurrentToken();
-              }}
-              className="w-full py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300 text-sm"
-            >
-              🔍 Debug Auth State
             </button>
           </form>
 

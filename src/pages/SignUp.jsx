@@ -23,9 +23,8 @@ const Signup = () => {
       ...formData,
       [name]: value
     });
-    setError(''); // Clear error when user types
+    setError('');
     
-    // Check email availability when email changes
     if (name === 'email' && value) {
       checkEmailExists(value);
     }
@@ -49,8 +48,6 @@ const Signup = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
-    // Basic validation
     if (emailExists) {
       setError('This email is already registered');
       setIsLoading(false);
@@ -94,7 +91,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side image */}
-      <div className="hidden md:flex w-1/2 bg-gray-100 items-center justify-center">
+      <div className="hidden md:flex w-1/2 bg-gray-100 items-center justify-center ml-10">
         <img
           src={shoppingImage}
           alt="E-commerce illustration"
@@ -105,7 +102,7 @@ const Signup = () => {
       <div className="flex w-full md:w-1/2 items-center justify-center p-10 bg-white">
         <div className="w-full max-w-md space-y-6">
           <h2 className="text-4xl font-bold text-gray-800">Create Account</h2>
-          <p className="text-gray-600">Join us and start shopping smarter!</p>
+          <p className="text-gray-600">SignUp as Admin to Manage the Entities</p>
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-md p-3">
@@ -122,7 +119,6 @@ const Signup = () => {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder="John"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -134,7 +130,6 @@ const Signup = () => {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  placeholder="Doe"
                   className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -149,7 +144,6 @@ const Signup = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="you@example.com"
                   className={`w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 ${
                     emailExists 
                       ? 'border-red-500 focus:ring-red-500' 

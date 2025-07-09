@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import api from '../utils/axios';
 
 const AuthContext = createContext();
 
@@ -20,10 +21,28 @@ export const AuthProvider = ({ children }) => {
     const userData = localStorage.getItem('userData');
     
     if (token && userData) {
-      setUser(JSON.parse(userData));
+      // Validate token with backend (optional)
+      validateToken(token, userData);
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
+
+  const validateToken = async (token, userData) => {
+    try {
+      // Try to make a request to validate the token
+      // You can replace this with an actual token validation endpoint
+      await api.get('/api/auth/validate');
+      setUser(JSON.parse(userData));
+    } catch (error) {
+      console.warn('Token validation failed, clearing stored data');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const login = (userData, token) => {
     localStorage.setItem('authToken', token);

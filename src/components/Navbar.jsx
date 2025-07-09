@@ -7,9 +7,7 @@ import {
   HelpCircle,
   Info,
   LogOut,
-  Maximize2,
   MessageSquare,
-  Minimize2,
   Moon,
   Search,
   Settings,
@@ -19,15 +17,92 @@ import {
   X
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = ({ isOpen }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [lastClickTime, setLastClickTime] = useState({});
+
+  // Helper functions to get user display data
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    
+    const firstName = user.firstName || user.first_name || '';
+    const lastName = user.lastName || user.last_name || '';
+    
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    } else if (user.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return 'User';
+    
+    const firstName = user.firstName || user.first_name || '';
+    const lastName = user.lastName || user.last_name || '';
+    
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
+    } else if (firstName) {
+      return firstName;
+    } else if (user.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  const getUserEmail = () => {
+    return user?.email || 'user@example.com';
+  };
+
+  const getUserRole = () => {
+    return user?.role || user?.userType || 'User';
+  };
+
+  const handleLogout = () => {
+    console.log('🔓 Logging out user...');
+    logout();
+    navigate('/login');
+  };
+
+  const handleViewProfile = () => {
+    setShowProfileModal(true);
+    setShowProfile(false); // Close dropdown
+  };
+
+  const handleAccountSettings = () => {
+    console.log('🔧 Opening account settings...');
+    // You can navigate to settings page or open a settings modal
+    // navigate('/settings');
+    alert('Account Settings - Feature coming soon!');
+    setShowProfile(false);
+  };
+
+  const handleSecurity = () => {
+    console.log('🔒 Opening security settings...');
+    // You can navigate to security page or open a security modal
+    alert('Security Settings - Feature coming soon!');
+    setShowProfile(false);
+  };
+
+  const handleHelpSupport = () => {
+    console.log('❓ Opening help & support...');
+    // You can navigate to help page or open a help modal
+    alert('Help & Support - Feature coming soon!');
+    setShowProfile(false);
+  };
 
   // Mock data for notifications
   const notifications = [
@@ -50,7 +125,7 @@ const Navbar = ({ isOpen }) => {
     const lastClick = lastClickTime[dropdownName] || 0;
     const timeDiff = now - lastClick;
 
-    if (timeDiff < 300) { // Double click within 300ms
+    if (timeDiff < 300) {
       // Close all dropdowns on double click
       setShowNotifications(false);
       setShowMessages(false);
@@ -350,11 +425,11 @@ const Navbar = ({ isOpen }) => {
               className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-all duration-200"
             >
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-sm">
-                <span className="text-white font-semibold text-sm">TI</span>
+                <span className="text-white font-semibold text-sm">{getUserInitials()}</span>
               </div>
               <div className="text-left hidden md:block">
-                <p className="text-sm font-semibold text-gray-800">Timothy Imani</p>
-                <p className="text-xs text-gray-500">Admin</p>
+                <p className="text-sm font-semibold text-gray-800">{getUserDisplayName()}</p>
+                <p className="text-xs text-gray-500">{getUserRole()}</p>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block" />
             </button>
@@ -365,11 +440,11 @@ const Navbar = ({ isOpen }) => {
                 <div className="px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold">TI</span>
+                      <span className="text-white font-semibold">{getUserInitials()}</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-800">Timothy Imani</p>
-                      <p className="text-sm text-gray-500">timothyimani@gmail.com</p>
+                      <p className="font-semibold text-gray-800">{getUserDisplayName()}</p>
+                      <p className="text-sm text-gray-500">{getUserEmail()}</p>
                       <div className="flex items-center space-x-2 mt-1">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <span className="text-xs text-gray-500">Online</span>
@@ -378,24 +453,39 @@ const Navbar = ({ isOpen }) => {
                   </div>
                 </div>
                 <div className="py-2">
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                  <button 
+                    onClick={handleViewProfile}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3"
+                  >
                     <User className="w-4 h-4" />
                     <span>View Profile</span>
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                  <button 
+                    onClick={handleAccountSettings}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3"
+                  >
                     <Settings className="w-4 h-4" />
                     <span>Account Settings</span>
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                  <button 
+                    onClick={handleSecurity}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3"
+                  >
                     <Shield className="w-4 h-4" />
                     <span>Security</span>
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3">
+                  <button 
+                    onClick={handleHelpSupport}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3"
+                  >
                     <HelpCircle className="w-4 h-4" />
                     <span>Help & Support</span>
                   </button>
                   <hr className="my-2 border-gray-100" />
-                  <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-3">
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-3"
+                  >
                     <LogOut className="w-4 h-4" />
                     <span>Sign Out</span>
                   </button>
@@ -413,6 +503,111 @@ const Navbar = ({ isOpen }) => {
           </button>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-[100]">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4 text-white">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">User Profile</h3>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {/* Profile Avatar and Basic Info */}
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">{getUserInitials()}</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800 text-lg">{getUserDisplayName()}</h4>
+                  <p className="text-gray-500">{getUserEmail()}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs text-gray-500">Online</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Details */}
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h5 className="font-medium text-gray-700 mb-3">Profile Information</h5>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Role:</span>
+                      <span className="text-sm font-medium text-gray-800">{getUserRole()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Email:</span>
+                      <span className="text-sm font-medium text-gray-800">{getUserEmail()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">First Name:</span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {user?.firstName || user?.first_name || 'Not specified'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Last Name:</span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {user?.lastName || user?.last_name || 'Not specified'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">User ID:</span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {user?.id || user?.userId || 'Not available'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Account Status:</span>
+                      <span className="text-sm font-medium text-green-600">Active</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional User Data */}
+                {user && Object.keys(user).length > 0 && (
+                  <div className="border-t pt-4">
+                    <h5 className="font-medium text-gray-700 mb-3">Additional Information</h5>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <pre className="text-xs text-gray-600 whitespace-pre-wrap">
+                        {JSON.stringify(user, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex space-x-3 mt-6 pt-4 border-t">
+                <button
+                  onClick={handleAccountSettings}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

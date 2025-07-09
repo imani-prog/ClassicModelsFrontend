@@ -33,32 +33,26 @@ const Dashboard = () => {
         trend: 'stable'
     });
 
-
-    // Function to process orders data into weekly trend
     const processOrderTrendData = (orders) => {
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
         
-        // Create array for last 7 days in correct order (Sun, Mon, Tue, Wed, Thu, Fri, Sat)
         const weekData = [];
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         
-        // Get the current week that includes today (Sunday to Saturday)
         const todayDayOfWeek = now.getDay();
         const daysFromSunday = todayDayOfWeek;
         
-        // Calculate Sunday of current week using local dates to avoid timezone issues
         const currentWeekSunday = new Date(now);
         currentWeekSunday.setDate(now.getDate() - daysFromSunday);
-        currentWeekSunday.setHours(0, 0, 0, 0); // Set to start of day
+        currentWeekSunday.setHours(0, 0, 0, 0);
         
-        // Create the current week starting from Sunday and ending with Saturday
         for (let i = 0; i < 7; i++) {
             const date = new Date(currentWeekSunday);
             date.setDate(currentWeekSunday.getDate() + i);
-            // Use local date string to avoid timezone issues
-            const localDateString = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+            
+            const localDateString = date.toLocaleDateString('en-CA');
             weekData.push({
                 day: dayNames[i],
                 date: localDateString,
@@ -67,22 +61,18 @@ const Dashboard = () => {
             });
         }
         
-        // Debug: Log the week data to verify dates
         console.log('Current week data:', weekData.map(d => `${d.day}: ${d.date}`));
         console.log('Today is:', now.toISOString().split('T')[0], 'Day of week:', now.getDay());
         
-        // Count orders for current week
         let currentWeekTotal = 0;
         let previousWeekTotal = 0;
         
         orders.forEach(order => {
             const orderDate = new Date(order.orderDate);
             
-            // Use local date string for consistent matching
-            const localDateString = orderDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+            const localDateString = orderDate.toLocaleDateString('en-CA');
             const utcDateString = orderDate.toISOString().split('T')[0];
             
-            // Debug: Log each order's date processing
             console.log('Processing order:', {
                 originalDate: order.orderDate,
                 parsedDate: orderDate,
@@ -91,7 +81,6 @@ const Dashboard = () => {
                 dayOfWeek: orderDate.getDay()
             });
             
-            // Find which day this order belongs to in our week data (try local first, then UTC)
             let dayData = weekData.find(day => day.date === localDateString);
             if (!dayData) {
                 dayData = weekData.find(day => day.date === utcDateString);
@@ -109,25 +98,21 @@ const Dashboard = () => {
                 console.log('Order NOT matched to any day in current week');
             }
             
-            // Count for previous week (8-14 days ago) for growth calculation
             if (orderDate >= fourteenDaysAgo && orderDate < sevenDaysAgo) {
                 previousWeekTotal++;
             }
         });
         
-        // Calculate insights
         const totalWeeklyOrders = currentWeekTotal;
         const averageDaily = Math.round(totalWeeklyOrders / 7);
         const weeklyGrowth = previousWeekTotal > 0 
             ? Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100)
             : 0;
         
-        // Find peak day
         const peakDayData = weekData.reduce((max, item) => 
             item.orders > max.orders ? item : max, weekData[0]
         );
         
-        // Determine trend
         let trend = 'stable';
         if (weekData.length >= 3) {
             const recent = weekData.slice(-3).reduce((sum, item) => sum + item.orders, 0);
@@ -136,7 +121,6 @@ const Dashboard = () => {
             else if (recent < earlier) trend = 'declining';
         }
         
-        // Update insights state
         setOrderInsights({
             totalWeeklyOrders,
             weeklyGrowth,
@@ -159,27 +143,26 @@ const Dashboard = () => {
             dashboardAPI.getRevenueSummary(),
         ])
         .then(([statsRes, chartRes, ordersRes, revenueRes]) => {
-            console.log('✅ Dashboard: All API responses received');
-            console.log('📊 Stats Response:', statsRes.data);
-            console.log('📊 Chart Response:', chartRes.data);
-            console.log('📊 Orders Response:', ordersRes.data);
-            console.log('📊 Revenue Response:', revenueRes.data);
+            console.log('Dashboard: All API responses received');
+            console.log('Stats Response:', statsRes.data);
+            console.log('Chart Response:', chartRes.data);
+            console.log('Orders Response:', ordersRes.data);
+            console.log('Revenue Response:', revenueRes.data);
             
             setStats(statsRes.data);
             setChartData(chartRes.data);
             
-            // Process real orders data into trend format
             const trendData = processOrderTrendData(ordersRes.data);
             setOrderTrendData(trendData);
             
             setRevenue(revenueRes.data);
             setLoading(false);
             
-            console.log('✅ Dashboard: All data set in state');
+            console.log('Dashboard: All data set in state');
         })
         .catch((err) => {
-            console.error('❌ Dashboard data loading error:', err);
-            console.error('❌ Error details:', {
+            console.error('Dashboard data loading error:', err);
+            console.error('Error details:', {
                 message: err.message,
                 status: err.response?.status,
                 data: err.response?.data
@@ -189,7 +172,6 @@ const Dashboard = () => {
         });
     }, []);
 
-    // Update time every second
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date());
@@ -198,7 +180,6 @@ const Dashboard = () => {
         return () => clearInterval(timer);
     }, []);
 
-    // Track online/offline status
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
@@ -206,12 +187,10 @@ const Dashboard = () => {
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
-        // Additional check with a small delay to ensure accurate status
         const checkConnection = () => {
             setIsOnline(navigator.onLine);
         };
 
-        // Check connection status periodically (every 30 seconds)
         const connectionCheck = setInterval(checkConnection, 30000);
 
         return () => {
@@ -239,16 +218,13 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen w-full p-4 bg-gray-50 overflow-x-hidden">
-            {/* Header with Quick Actions */}
             <div className="mb-6 flex items-start justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-1">Dashboard</h1>
                     <p className="text-gray-600 text-base">Welcome back, Tim! <span role="img" aria-label="smile">😊</span></p>
                 </div>
                 
-                {/* Small utility elements in the middle space */}
                 <div className="flex items-center gap-3 mt-1">
-                    {/* Current Date - Enhanced */}
                     <div className="text-center bg-white rounded-lg px-2 py-1.5 shadow-sm border border-gray-200">
                         <div className="text-xs text-gray-500 font-medium">
                             {new Date().toLocaleDateString('en-US', { 
@@ -264,7 +240,6 @@ const Dashboard = () => {
                         </div>
                     </div>
                     
-                    {/* Time indicator with toggle */}
                     <div 
                         className="cursor-pointer bg-blue-100 hover:bg-blue-200 rounded-lg px-2 py-1.5 transition-colors"
                         onClick={() => setIs24Hour(!is24Hour)}
@@ -467,7 +442,6 @@ const Dashboard = () => {
                         </div>
                     </div>
                     
-                    {/* Additional Info Cards Row - Make dashboard more information-dense */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
                         {/* Quick Stats Mini Cards */}
                         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
@@ -559,7 +533,6 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Recent Activity & Quick Actions Row */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         {/* Recent Activity */}
                         <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-4 border border-gray-100">
