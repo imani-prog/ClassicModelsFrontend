@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "./Navbar"; // ✅ Make sure you have this component
+import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("darkMode") === "false";
@@ -40,7 +40,7 @@ const Layout = () => {
         `}
       >
         <div className="h-full overflow-y-auto overflow-x-hidden">
-          <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />
+          {children ? children : <Outlet context={{ darkMode, setDarkMode, isOpen, setIsOpen }} />}
         </div>
       </div>
     </>

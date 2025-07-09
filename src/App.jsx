@@ -4,6 +4,7 @@ import OrderCard from './components/OrderCard'
 import ProductCard from './components/ProductCard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './contexts/AuthContext'
+import AdminProfile from './pages/AdminProfile'
 import CustomerDetail from './pages/CustomerDetail'
 import CustomerOrders from './pages/CustomerOrders'
 import CustomerPayments from './pages/CustomerPayments'
@@ -45,6 +46,16 @@ const App = () => {
       {/* Authentication routes (no layout) */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      
+      {/* Admin Profile - Separate protected route with layout */}
+      <Route path="/admin-profile" element={
+        <ProtectedRoute>
+          <Layout>
+            {console.log('🔍 App.jsx - AdminProfile route matched!')}
+            <AdminProfile />
+          </Layout>
+        </ProtectedRoute>
+      } />
       
       {/* Protected routes with layout */}
       <Route element={

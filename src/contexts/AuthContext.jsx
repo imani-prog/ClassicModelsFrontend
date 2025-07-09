@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable no-unused-vars */
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../utils/axios';
 
@@ -16,12 +18,10 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on app start
     const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('userData');
     
     if (token && userData) {
-      // Validate token with backend (optional)
       validateToken(token, userData);
     } else {
       setIsLoading(false);
@@ -30,10 +30,9 @@ export const AuthProvider = ({ children }) => {
 
   const validateToken = async (token, userData) => {
     try {
-      // Try to make a request to validate the token
-      // You can replace this with an actual token validation endpoint
       await api.get('/api/auth/validate');
       setUser(JSON.parse(userData));
+  
     } catch (error) {
       console.warn('Token validation failed, clearing stored data');
       localStorage.removeItem('authToken');
