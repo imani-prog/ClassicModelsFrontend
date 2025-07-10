@@ -33,13 +33,10 @@ const CustomerDetail = () => {
                     const ordersData = await ordersRes.json();
                     const paymentsData = await paymentsRes.json();
 
-                    // Process orders for this customer
                     const customerOrders = ordersData.filter(order => 
                         String(order.customerNumber?.id || order.customerNumber) === String(customerId)
                     );
-                    
-
-                    // Process payments for this customer
+            
                     const customerPayments = paymentsData
                         .map(payment => ({
                             customerId: payment.id.customerNumber,
@@ -48,7 +45,6 @@ const CustomerDetail = () => {
                         }))
                         .filter(payment => String(payment.customerId) === String(customerId));
 
-                    // Calculate stats
                     const stats = {
                         totalOrders: customerOrders.length,
                         totalPayments: customerPayments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0),
@@ -94,7 +90,7 @@ const CustomerDetail = () => {
         }
     };
 
-    // Enhanced logic for action buttons
+    //logic for action buttons
     const getOrdersButtonLogic = () => {
         const hasOrders = customerStats.totalOrders > 0;
         const isRecent = customerStats.lastOrderDate && 
@@ -276,7 +272,7 @@ const CustomerDetail = () => {
                     </div>
                 </div>
 
-            {/* Compact Customer Information cards */}
+            {/*Customer Information cards */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                 {/* Contact Information Card */}
                 <div className="bg-white rounded-lg shadow-md border border-gray-100 p-4 hover:shadow-lg transition-shadow duration-200">

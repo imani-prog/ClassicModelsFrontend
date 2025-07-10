@@ -76,7 +76,7 @@ const QuickActions = () => {
             label: 'Analytics',
             icon: FaChartBar,
             action: () => {
-                // Scroll to analytics section
+                
                 document.getElementById('analytics-section')?.scrollIntoView({ behavior: 'smooth' });
                 setIsOpen(false);
             },
@@ -169,7 +169,6 @@ const QuickActions = () => {
                 onClose={() => setShowPaymentForm(false)}
                 onSubmit={(result) => {
                     console.log('Payment added:', result);
-                    // Optionally refresh any payment-related data
                 }}
             />
             
@@ -178,7 +177,6 @@ const QuickActions = () => {
                 onClose={() => setShowEmployeeForm(false)}
                 onSubmit={(result) => {
                     console.log('Employee added:', result);
-                    // Optionally refresh any employee-related data
                 }}
             />
             
@@ -187,7 +185,6 @@ const QuickActions = () => {
                 onClose={() => setShowOfficeForm(false)}
                 onSubmit={(result) => {
                     console.log('Office added:', result);
-                    // Optionally refresh any office-related data
                 }}
             />
             
@@ -196,7 +193,6 @@ const QuickActions = () => {
                 onClose={() => setShowCustomerForm(false)}
                 onSubmit={(result) => {
                     console.log('Customer added:', result);
-                    // Optionally refresh any customer-related data
                 }}
             />
             
@@ -205,7 +201,6 @@ const QuickActions = () => {
                 onClose={() => setShowProductForm(false)}
                 onSubmit={(result) => {
                     console.log('Product added:', result);
-                    // Optionally refresh any product-related data
                 }}
             />
         </div>

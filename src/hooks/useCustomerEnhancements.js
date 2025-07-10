@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 
 const useCustomerEnhancements = (customers) => {
-    // Enhanced features state
+
     const [sortBy, setSortBy] = useState('customerName');
     const [filterCountry, setFilterCountry] = useState('');
     const [filterState, setFilterState] = useState('');
     const [showFilters, setShowFilters] = useState(false);
     const [globalSearch, setGlobalSearch] = useState('');
 
-    // Enhanced filtering and sorting logic
+ 
     const filteredCustomers = useMemo(() => {
         return customers
             .filter(customer => {
@@ -22,10 +22,8 @@ const useCustomerEnhancements = (customers) => {
                     customer.country?.toLowerCase().includes(globalSearch.toLowerCase()) ||
                     String(customer.id || '').toLowerCase().includes(globalSearch.toLowerCase());
                 
-                // Country filter
                 const countryMatch = !filterCountry || customer.country === filterCountry;
                 
-                // State filter
                 const stateMatch = !filterState || customer.state === filterState;
                 
                 return searchMatch && countryMatch && stateMatch;
@@ -44,7 +42,6 @@ const useCustomerEnhancements = (customers) => {
             });
     }, [customers, globalSearch, filterCountry, filterState, sortBy]);
 
-    // Get unique countries and states for filters
     const countries = useMemo(() => {
         return [...new Set(customers.map(customer => customer.country).filter(Boolean))].sort();
     }, [customers]);
@@ -54,7 +51,6 @@ const useCustomerEnhancements = (customers) => {
     }, [customers]);
 
     return {
-        // State
         sortBy,
         filterCountry,
         filterState,

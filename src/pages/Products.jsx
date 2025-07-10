@@ -10,7 +10,6 @@ import useAllProducts from '../hooks/useAllProducts';
 import useProductEnhancements from '../hooks/useProductEnhancements';
 
 const Products = () => {
-    // Get all products for display and stats
     const {
         products: allProducts,
         loading: productsLoading,
@@ -18,7 +17,6 @@ const Products = () => {
         refreshProducts
     } = useAllProducts();
 
-    // Enhanced features based on all products
     const {
         sortBy,
         filterVendor,
@@ -35,7 +33,6 @@ const Products = () => {
         setGlobalSearch
     } = useProductEnhancements(allProducts);
 
-    // Local state for modals and forms
     const [viewProduct, setViewProduct] = useState(null);
     const [editProduct, setEditProduct] = useState(null);
     const [editForm, setEditForm] = useState({});
@@ -61,18 +58,15 @@ const Products = () => {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [availableProductLines, setAvailableProductLines] = useState([]);
 
-    // Toast helper
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
     };
 
-    // Fetch product lines from backend
     const fetchProductLines = useCallback(async () => {
         try {
             console.log('Attempting to fetch product lines...');
             
-            // Try multiple possible endpoints
             const possibleEndpoints = [
                 'http://localhost:8081/productlines',
                 'http://localhost:8081/productLines', 
@@ -109,7 +103,6 @@ const Products = () => {
                 console.error('All product line endpoints failed');
                 showToast('Could not find product lines endpoint. Please check your backend API.', 'error');
                 
-                // As a last resort, use the existing product lines from products
                 if (productLines && productLines.length > 0) {
                     console.log('Falling back to existing product lines from products:', productLines);
                     setAvailableProductLines(productLines);
@@ -120,7 +113,6 @@ const Products = () => {
             console.error('Error fetching product lines:', error);
             showToast('Error connecting to database for product lines', 'error');
             
-            // Fallback to existing product lines
             if (productLines && productLines.length > 0) {
                 console.log('Using fallback product lines:', productLines);
                 setAvailableProductLines(productLines);
@@ -128,27 +120,23 @@ const Products = () => {
         }
     }, [productLines]);
 
-    // Fetch product lines when component mounts
     useEffect(() => {
-        // Test basic connectivity first
         fetch('http://localhost:8081/products')
             .then(response => {
                 console.log('Basic connectivity test - products endpoint status:', response.status);
                 if (response.ok) {
-                    console.log('✅ Backend is reachable at localhost:8081');
+                    console.log('Backend is reachable at localhost:8081');
                 } else {
-                    console.log('❌ Backend products endpoint returned:', response.status);
+                    console.log('Backend products endpoint returned:', response.status);
                 }
             })
             .catch(error => {
-                console.log('❌ Backend connectivity test failed:', error.message);
+                console.log('Backend connectivity test failed:', error.message);
             });
             
-        // Now try to fetch product lines
         fetchProductLines();
     }, [fetchProductLines]);
 
-    // Product selection handlers
     const handleSelectProduct = (productCode, checked) => {
         if (checked) {
             setSelectedProducts(prev => [...prev, productCode]);
@@ -193,7 +181,6 @@ const Products = () => {
         setEditProduct(product);
         setEditForm({ ...product });
         setShowEdit(true);
-        // Refresh product lines to ensure we have the latest data
         fetchProductLines();
     };
 
@@ -260,7 +247,6 @@ const Products = () => {
         });
         setSearchError('');
         setSearchSuccess('');
-        // Refresh product lines to ensure we have the latest data
         fetchProductLines();
     };
 
@@ -298,7 +284,7 @@ const Products = () => {
 
     return (
         <div className="max-w-6xl mx-auto px-2 h-full flex flex-col pt-2">
-            {/* Header Section - Fixed height */}
+            {/* Header Section */}
             <div className='flex items-start justify-between mb-3 flex-shrink-0'>
                 <div className="flex flex-col">
                     <h1 className="text-2xl font-bold mb-1">Products</h1>
@@ -309,7 +295,7 @@ const Products = () => {
                 <ProductStats products={allProducts} />
             </div>
             
-            {/* Search Section - Fixed height */}
+            {/* Search Section*/}
             <div className="mb-3 flex-shrink-0">
                 <EnhancedProductSearch
                     searchError={searchError}
@@ -317,7 +303,6 @@ const Products = () => {
                     onOpenAddForm={handleAddProduct}
                     selectedProducts={selectedProducts}
                     onBulkDelete={handleBulkDelete}
-                    // Enhanced props
                     globalSearch={globalSearch}
                     onGlobalSearchChange={setGlobalSearch}
                     sortBy={sortBy}
@@ -335,7 +320,7 @@ const Products = () => {
                 />
             </div>
 
-            {/* Table Section - Flexible height */}
+            {/* Table Section*/}
             <div className="flex-1 min-h-0 mb-2">
                 <EnhancedProductTable
                     products={filteredProducts}

@@ -2,10 +2,11 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-  console.log('🔒 ProtectedRoute - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
+  const { isAuthenticated, isLoading, isInitialized } = useAuth();
+  console.log('🔒 ProtectedRoute - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading, 'isInitialized:', isInitialized);
 
-  if (isLoading) {
+  // Show loading while we're still initializing authentication
+  if (isLoading || !isInitialized) {
     console.log('🔒 ProtectedRoute showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center">

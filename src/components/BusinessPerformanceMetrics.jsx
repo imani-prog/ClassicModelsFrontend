@@ -10,7 +10,6 @@ const BusinessAnalytics = () => {
         customers: []
     });
 
-    // Color schemes for the charts - memoized for performance
     const colors = useMemo(() => ({
         creditLimits: ['#10B981', '#F59E0B', '#EF4444', '#6366F1'],
         productLines: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'],
@@ -18,7 +17,6 @@ const BusinessAnalytics = () => {
         customers: ['#2563EB', '#7C2D12', '#059669', '#DC2626', '#8B5CF6', '#EC4899']
     }), []);
 
-    // Fallback data - memoized to prevent recreation
     const fallbackData = useMemo(() => ({
         creditLimits: [
             { name: 'Low (0-50K)', value: 45, percentage: 37 },
@@ -51,45 +49,38 @@ const BusinessAnalytics = () => {
         ]
     }), []);
 
-    // Optimized data processing functions
     const processBusinessData = useCallback((customers, products, payments) => {
         const creditLimitRanges = { 'Low (0-50K)': 0, 'Medium (50K-100K)': 0, 'High (100K-200K)': 0, 'Premium (200K+)': 0 };
         const productLineCounts = {};
         const countryCounts = {};
 
-        // Single optimized loop for customers
         if (customers?.length) {
             customers.forEach(customer => {
-                // Credit limits processing
+            
                 const limit = parseFloat(customer.creditLimit) || 0;
                 if (limit <= 50000) creditLimitRanges['Low (0-50K)']++;
                 else if (limit <= 100000) creditLimitRanges['Medium (50K-100K)']++;
                 else if (limit <= 200000) creditLimitRanges['High (100K-200K)']++;
                 else creditLimitRanges['Premium (200K+)']++;
 
-                // Countries processing
                 const country = customer.country || 'Unknown';
                 countryCounts[country] = (countryCounts[country] || 0) + 1;
             });
         }
 
-        // Single optimized loop for products
         if (products?.length) {
-            console.log('Processing products:', products.length, 'products'); // Debug log
-            console.log('Sample product:', products[0]); // Debug log
+            console.log('Processing products:', products.length, 'products');
+            console.log('Sample product:', products[0]);
             console.log('ProductLine type and value:', typeof products[0]?.productLine, products[0]?.productLine); // Debug log
             
             products.forEach(product => {
-                // Handle productLine being an object or string
-                let line = 'Other'; // Default fallback
+                let line = 'Other';
                 
                 if (typeof product.productLine === 'string' && product.productLine.trim()) {
                     line = product.productLine.trim();
                 } else if (typeof product.productLine === 'object' && product.productLine !== null) {
-                    // If productLine is an object, try to extract meaningful data
                     const objKeys = Object.keys(product.productLine);
                     if (objKeys.length > 0) {
-                        // Try common property names
                         line = product.productLine.name || 
                                product.productLine.productLine || 
                                product.productLine.type ||
@@ -97,7 +88,6 @@ const BusinessAnalytics = () => {
                                `Unknown-${objKeys[0]}`;
                     }
                 } else if (product.productCode) {
-                    // Fallback to using product code pattern to guess category
                     const code = product.productCode.toUpperCase();
                     if (code.includes('MOTOR')) line = 'Motorcycles';
                     else if (code.includes('PLANE')) line = 'Planes';
@@ -105,17 +95,16 @@ const BusinessAnalytics = () => {
                     else if (code.includes('TRAIN')) line = 'Trains';
                     else if (code.includes('TRUCK') || code.includes('BUS')) line = 'Trucks and Buses';
                     else if (code.includes('VINTAGE')) line = 'Vintage Cars';
-                    else line = 'Classic Cars'; // Default for cars
+                    else line = 'Classic Cars';
                 }
                 
                 productLineCounts[line] = (productLineCounts[line] || 0) + 1;
             });
-            console.log('Product line counts:', productLineCounts); // Debug log
+            console.log('Product line counts:', productLineCounts);
         } else {
-            console.log('No products data available'); // Debug log
+            console.log('No products data available');
         }
 
-        // Process payments
         const paymentRanges = { 'Small (0-10K)': 0, 'Medium (10K-50K)': 0, 'Large (50K-100K)': 0, 'Huge (100K+)': 0 };
         if (payments?.length) {
             payments.forEach(payment => {
@@ -127,17 +116,15 @@ const BusinessAnalytics = () => {
             });
         }
 
-        // Fast data transformation with fallback
         const customerCount = customers?.length || 1;
         const productCount = products?.length || 1;
         const paymentCount = payments?.length || 1;
 
-        // Ensure we have valid product lines data
         const productLinesData = Object.keys(productLineCounts).length > 0 
             ? Object.entries(productLineCounts)
                 .map(([name, value]) => ({ name, value, percentage: Math.round((value / productCount) * 100) }))
                 .sort((a, b) => b.value - a.value)
-            : []; // Return empty array if no product data
+            : [];
 
         return {
             creditLimits: Object.entries(creditLimitRanges).map(([name, value]) => ({
@@ -157,12 +144,10 @@ const BusinessAnalytics = () => {
         let isMounted = true;
 
         const fetchBusinessData = async () => {
-            // Show fallback data immediately for instant UI
             setBusinessData(fallbackData);
 
             try {
-                // Reduced timeout for faster fallback
-                const timeout = 3000; // 3 seconds timeout
+                const timeout = 3000;
                 
                 const fetchWithTimeout = (url) => {
                     const controller = new AbortController();
@@ -184,9 +169,8 @@ const BusinessAnalytics = () => {
                         });
                 };
 
-                console.log('Fetching data from APIs...'); // Debug log
+                console.log('Fetching data from APIs...');
 
-                // Parallel API calls with immediate fallback
                 const [customersRes, productsRes, paymentsRes] = await Promise.allSettled([
                     fetchWithTimeout('http://localhost:8081/customers'),
                     fetchWithTimeout('http://localhost:8081/products'),
@@ -197,11 +181,9 @@ const BusinessAnalytics = () => {
                     customers: customersRes.status, 
                     products: productsRes.status, 
                     payments: paymentsRes.status 
-                }); // Debug log
+                });
 
                 if (!isMounted) return;
-
-                // Extract successful responses
                 const customers = customersRes.status === 'fulfilled' ? customersRes.value : null;
                 const products = productsRes.status === 'fulfilled' ? productsRes.value : null;
                 const payments = paymentsRes.status === 'fulfilled' ? paymentsRes.value : null;
@@ -210,17 +192,15 @@ const BusinessAnalytics = () => {
                     customersCount: customers?.length || 0, 
                     productsCount: products?.length || 0, 
                     paymentsCount: payments?.length || 0 
-                }); // Debug log
+                })
 
-                // Process data if we have any successful responses
                 if (customers || products || payments) {
                     const processedData = processBusinessData(customers, products, payments);
                     
-                    console.log('Processed Data:', processedData); // Debug log
+                    console.log('Processed Data:', processedData);
                     
-                    // Only update if we got better data than fallback
                     if (customers?.length > 0 || products?.length > 0) {
-                        // Merge with fallback data to ensure all charts have data
+                        
                         setBusinessData({
                             creditLimits: processedData.creditLimits.length > 0 ? processedData.creditLimits : fallbackData.creditLimits,
                             productLines: processedData.productLines.length > 0 ? processedData.productLines : fallbackData.productLines,
@@ -233,7 +213,6 @@ const BusinessAnalytics = () => {
                 }
             } catch (error) {
                 console.warn('API call failed, using fallback data:', error);
-                // Fallback data is already set, no need to set again
             }
         };
 
@@ -244,7 +223,6 @@ const BusinessAnalytics = () => {
         };
     }, [fallbackData, processBusinessData]);
 
-    // Custom tooltip component - memoized for performance
     const CustomTooltip = useCallback(({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0];
@@ -263,9 +241,7 @@ const BusinessAnalytics = () => {
         return null;
     }, []);
 
-    // Memoized chart components for better performance
     const ChartSection = useCallback(({ title, icon, data, colors, showCount = false }) => {
-        // Ensure data is valid and not empty
         const validData = Array.isArray(data) && data.length > 0 ? data : [];
         
         return (
@@ -322,7 +298,6 @@ const BusinessAnalytics = () => {
         );
     }, []);
 
-    // Instantly show content - no loading state needed
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">

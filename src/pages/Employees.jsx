@@ -44,8 +44,8 @@ const Employees = () => {
     const [successMsg, setSuccessMsg] = useState('');
 
     // New state for enhanced features
-    const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'list'
-    const [sortBy, setSortBy] = useState('name'); // 'name', 'title', 'office'
+    const [viewMode, setViewMode] = useState('cards');
+    const [sortBy, setSortBy] = useState('name');
     const [filterOffice, setFilterOffice] = useState('');
     const [filterJobTitle, setFilterJobTitle] = useState('');
     const [showFilters, setShowFilters] = useState(false);
@@ -65,17 +65,12 @@ const Employees = () => {
     // Enhanced filtering and sorting logic
     const filteredEmployees = employees
         .filter(emp => {
-            // Text search filter
             const textMatch = `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
                 emp.email?.toLowerCase().includes(search.toLowerCase()) ||
                 String(emp.id || '').includes(search);
-            
-            // Office filter
+        
             const officeMatch = !filterOffice || emp.officeCode === filterOffice;
-            
-            // Job title filter
             const titleMatch = !filterJobTitle || emp.jobTitle?.toLowerCase().includes(filterJobTitle.toLowerCase());
-            
             return textMatch && officeMatch && titleMatch;
         })
         .sort((a, b) => {
@@ -94,29 +89,11 @@ const Employees = () => {
     // Get unique values for filter options
     const uniqueOffices = [...new Set(employees.map(emp => emp.officeCode).filter(Boolean))];
     const uniqueJobTitles = [...new Set(employees.map(emp => emp.jobTitle).filter(Boolean))];
-
-    // Calculate statistics
     const totalEmployees = employees.length;
     const totalOffices = uniqueOffices.length;
-    
-    // Supervisors: employees who have at least one direct report
     const supervisors = employees.filter(emp => 
         employees.some(other => other.reportsTo === emp.id)
     ).length;
-    
-    // Alternative calculations (you can switch to any of these):
-    
-    // Option 1: Total number of direct reporting relationships
-    // const totalDirectReports = employees.filter(emp => emp.reportsTo).length;
-    
-    // Option 2: Employees without a supervisor (top-level managers)
-    // const topLevelManagers = employees.filter(emp => !emp.reportsTo).length;
-    
-    // Option 3: Average team size per supervisor
-    // const avgTeamSize = supervisors > 0 ? 
-    //     Math.round(employees.filter(emp => emp.reportsTo).length / supervisors) : 0;
-
-    // Helper function to render employee card
     const renderEmployeeCard = (employee, idx) => {
         let reportsToDisplay = '-';
         if (employee.reportsTo) {

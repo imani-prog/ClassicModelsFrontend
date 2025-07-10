@@ -17,9 +17,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const AdminProfile = () => {
-  console.log('🚀 AdminProfile component is loading!');
+  console.log('AdminProfile component is loading!');
   const { user, logout, isLoading } = useAuth();
-  console.log('🚀 AdminProfile - user:', user, 'isLoading:', isLoading);
+  console.log('AdminProfile - user:', user, 'isLoading:', isLoading);
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
@@ -52,10 +52,7 @@ const AdminProfile = () => {
 
   useEffect(() => {
     if (user) {
-      // Debug: Log user data to see available fields
       console.log('User data available:', user);
-      
-      // Initialize profile data from user context
       setProfileData({
         firstName: user.firstName || user.first_name || '',
         lastName: user.lastName || user.last_name || '',
@@ -67,7 +64,6 @@ const AdminProfile = () => {
         bio: user.bio || ''
       });
 
-      // Use real user data for admin stats
       setAdminStats({
         totalLogins: user.totalLogins || user.login_count || 0,
         lastLogin: user.lastLogin || user.last_login || new Date().toISOString(),
@@ -76,19 +72,13 @@ const AdminProfile = () => {
         systemAccess: ['Dashboard', 'User Management', 'Reports', 'Settings', 'System Logs']
       });
 
-      // Fetch real activity log from backend (placeholder for now)
       fetchUserActivityLog();
     }
   }, [user]);
 
   const fetchUserActivityLog = async () => {
     try {
-      // TODO: Replace with actual API endpoint
-      // const response = await fetch('/api/user/activity-log');
-      // const data = await response.json();
-      // setActivityLog(data);
-      
-      // For now, use recent mock data that could represent real backend data
+     
       setActivityLog([
         { action: 'Logged in to dashboard', timestamp: new Date().toISOString(), ip: '192.168.1.100' },
         { action: 'Viewed customer records', timestamp: new Date(Date.now() - 3600000).toISOString(), ip: '192.168.1.100' },
@@ -103,7 +93,7 @@ const AdminProfile = () => {
   };
 
   const handleSaveProfile = () => {
-    // TODO: Implement API call to save profile data
+ 
     console.log('Saving profile data:', profileData);
     setIsEditing(false);
   };
@@ -113,7 +103,7 @@ const AdminProfile = () => {
       ...prev,
       [key]: value
     }));
-    // TODO: Implement API call to save preferences
+
     console.log('Updated preference:', key, value);
   };
 
@@ -165,7 +155,6 @@ const AdminProfile = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  // Show loading state while user data is loading
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

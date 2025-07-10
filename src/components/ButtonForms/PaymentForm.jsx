@@ -50,15 +50,11 @@ const PaymentForm = ({ showForm, onClose, onSubmit }) => {
             const result = await response.json();
             setSuccess('Payment added successfully!');
             
-            // Reset form
             setForm({ customerId: '', checkNo: '', amount: '', date: '' });
             
-            // Call parent callback if provided
             if (onSubmit) {
                 onSubmit(result);
             }
-
-            // Auto close after success
             setTimeout(() => {
                 setSuccess('');
                 onClose();

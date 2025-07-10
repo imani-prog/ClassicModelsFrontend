@@ -26,11 +26,9 @@ const Navbar = ({ isOpen }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [lastClickTime, setLastClickTime] = useState({});
 
-  // Helper functions to get user display data
   const getUserInitials = () => {
     if (!user) return 'U';
     
@@ -70,41 +68,36 @@ const Navbar = ({ isOpen }) => {
   };
 
   const handleLogout = () => {
-    console.log('🔓 Logging out user...');
+    console.log('Logging out user...');
     logout();
     navigate('/login');
   };
 
   const handleViewProfile = () => {
-    console.log('🔍 Attempting to navigate to /admin-profile');
+    console.log('Attempting to navigate to /admin-profile');
     navigate('/admin-profile');
-    console.log('🔍 Navigate call completed');
-    setShowProfile(false); // Close dropdown
+    console.log('Navigate call completed');
+    setShowProfile(false);
   };
 
   const handleAccountSettings = () => {
-    console.log('🔧 Opening account settings...');
-    // You can navigate to settings page or open a settings modal
-    // navigate('/settings');
+    console.log('Opening account settings...');
     alert('Account Settings - Feature coming soon!');
     setShowProfile(false);
   };
 
   const handleSecurity = () => {
-    console.log('🔒 Opening security settings...');
-    // You can navigate to security page or open a security modal
+    console.log('Opening security settings...');
     alert('Security Settings - Feature coming soon!');
     setShowProfile(false);
   };
 
   const handleHelpSupport = () => {
-    console.log('❓ Opening help & support...');
-    // You can navigate to help page or open a help modal
+    console.log('Opening help & support...');
     alert('Help & Support - Feature coming soon!');
     setShowProfile(false);
   };
 
-  // Mock data for notifications
   const notifications = [
     { id: 1, type: 'order', message: 'New order #ORD-2166 received', time: '2 minutes ago', read: false },
     { id: 2, type: 'payment', message: 'Payment of $1,250 processed', time: '15 minutes ago', read: false },
@@ -112,51 +105,37 @@ const Navbar = ({ isOpen }) => {
     { id: 4, type: 'info', message: 'System maintenance scheduled', time: '2 hours ago', read: true },
   ];
 
-  // Mock data for messages
   const messages = [
     { id: 1, sender: 'John Smith', avatar: 'J', message: 'Order inquiry about product #123', time: '5 min ago', online: true },
     { id: 2, sender: 'Sarah Johnson', avatar: 'S', message: 'Payment confirmation needed', time: '12 min ago', online: false },
     { id: 3, sender: 'Mike Davis', avatar: 'M', message: 'Shipping update request', time: '1 hour ago', online: true },
   ];
 
-  // Handle double click to close dropdowns
   const handleDropdownClick = (dropdownName) => {
     const now = Date.now();
     const lastClick = lastClickTime[dropdownName] || 0;
     const timeDiff = now - lastClick;
 
     if (timeDiff < 300) {
-      // Close all dropdowns on double click
       setShowNotifications(false);
       setShowMessages(false);
       setShowProfile(false);
-      setShowHelp(false);
     } else {
-      // Single click - toggle specific dropdown
       switch (dropdownName) {
         case 'notifications':
           setShowNotifications(!showNotifications);
           setShowMessages(false);
           setShowProfile(false);
-          setShowHelp(false);
           break;
         case 'messages':
           setShowMessages(!showMessages);
           setShowNotifications(false);
           setShowProfile(false);
-          setShowHelp(false);
           break;
         case 'profile':
           setShowProfile(!showProfile);
           setShowNotifications(false);
           setShowMessages(false);
-          setShowHelp(false);
-          break;
-        case 'help':
-          setShowHelp(!showHelp);
-          setShowNotifications(false);
-          setShowMessages(false);
-          setShowProfile(false);
           break;
       }
     }
@@ -164,14 +143,12 @@ const Navbar = ({ isOpen }) => {
     setLastClickTime(prev => ({ ...prev, [dropdownName]: now }));
   };
 
-  // Close dropdowns when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.dropdown-container')) {
         setShowNotifications(false);
         setShowMessages(false);
         setShowProfile(false);
-        setShowHelp(false);
       }
     };
 
@@ -190,23 +167,19 @@ const Navbar = ({ isOpen }) => {
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value);
-    // Add search logic here
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      // Handle search submission
       console.log('Searching for:', searchValue);
     }
   };
 
   const markNotificationAsRead = (id) => {
-    // Logic to mark notification as read
     console.log('Marking notification as read:', id);
   };
 
   const clearAllNotifications = () => {
-    // Logic to clear all notifications
     console.log('Clearing all notifications');
   };
 
@@ -228,7 +201,7 @@ const Navbar = ({ isOpen }) => {
     }`}>
       <div className="flex items-center justify-between px-6 h-full">
         
-        {/* Left Section - Search with Enhanced Features */}
+        {/* Left Section*/}
         <div className="flex-1 max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -265,44 +238,6 @@ const Navbar = ({ isOpen }) => {
               <Moon className="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition-colors" />
             )}
           </button>
-
-          {/* Help & Support */}
-          <div className="relative dropdown-container">
-            <button
-              onClick={() => handleDropdownClick('help')}
-              className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 group"
-              title="Help & Support"
-            >
-              <HelpCircle className="w-5 h-5 text-gray-600 group-hover:text-green-500 transition-colors" />
-            </button>
-            
-            {/* Help Dropdown */}
-            {showHelp && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-800">Help & Support</h3>
-                </div>
-                <div className="py-2">
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    Documentation
-                  </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    Keyboard Shortcuts
-                  </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    Contact Support
-                  </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    Report Bug
-                  </button>
-                  <hr className="my-2 border-gray-100" />
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                    System Status
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Enhanced Notifications */}
           <div className="relative dropdown-container">
@@ -493,14 +428,6 @@ const Navbar = ({ isOpen }) => {
               </div>
             )}
           </div>
-
-          {/* Settings */}
-          <button 
-            className="p-2.5 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all duration-200 group"
-            title="Settings"
-          >
-            <Settings className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors" />
-          </button>
         </div>
       </div>
 

@@ -2,7 +2,6 @@ import { FaFilter, FaPlus, FaSortAmountDown, FaTrash } from 'react-icons/fa';
 import { IoSearch } from 'react-icons/io5';
 
 const EnhancedCustomerSearch = ({ 
-    // Original search props (keeping for modal functionality)
     searchResult, 
     searchError, 
     searchEditMode,
@@ -13,8 +12,7 @@ const EnhancedCustomerSearch = ({
     onOpenForm,
     selectedCustomers = [],
     onBulkDelete,
-    
-    // Enhanced filter props
+
     globalSearch,
     onGlobalSearchChange,
     sortBy,
@@ -32,7 +30,7 @@ const EnhancedCustomerSearch = ({
 }) => {
     return (
         <div className="space-y-4">
-            {/* Single Search Bar with Controls */}
+            {/*Search Bar with Controls */}
             <div className="flex items-center gap-4 flex-wrap">
                 {/* Main Search Bar */}
                 <div className="relative flex-1 min-w-80">
@@ -169,7 +167,7 @@ const EnhancedCustomerSearch = ({
                 </div>
             )}
             
-            {/* Search Result Modal - matching Orders page style */}
+            {/* Search Result Modal*/}
             {searchResult && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className="bg-white border border-blue-300 rounded-lg p-6 w-full max-w-2xl shadow-lg relative max-h-[90vh] overflow-y-auto">

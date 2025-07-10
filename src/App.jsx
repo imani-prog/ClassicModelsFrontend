@@ -21,9 +21,9 @@ import Products from './pages/Products'
 import SignUp from './pages/SignUp'
 
 const RootRedirect = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isInitialized } = useAuth();
   
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

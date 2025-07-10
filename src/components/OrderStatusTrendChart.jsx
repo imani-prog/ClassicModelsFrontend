@@ -168,6 +168,7 @@ const OrderStatusTrendChart = () => {
   };
 
   
+  // eslint-disable-next-line no-unused-vars
   const StatCard = ({ title, value, trend, icon: Icon, color }) => (
     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col space-y-3">

@@ -32,6 +32,60 @@ const Dashboard = () => {
         averageDaily: 0,
         trend: 'stable'
     });
+    const [liveMetrics, setLiveMetrics] = useState({
+        todayOrders: 0,
+        pendingOrders: 0,
+        lowStockProducts: 0,
+        totalReturns: 0,
+        conversionRate: 0,
+        averageOrderValue: 0
+    });
+    const [allOrders, setAllOrders] = useState([]);
+    const [allProducts, setAllProducts] = useState([]); // eslint-disable-line no-unused-vars
+
+    const calculateLiveMetrics = (orders, products) => {
+        const today = new Date().toISOString().split('T')[0];
+        
+        const todayOrders = orders.filter(order => {
+            const orderDate = new Date(order.orderDate).toISOString().split('T')[0];
+            return orderDate === today;
+        }).length;
+
+        const pendingOrders = orders.filter(order => 
+            order.status && (
+                order.status.toLowerCase().includes('pending') ||
+                order.status.toLowerCase().includes('processing') ||
+                order.status.toLowerCase().includes('shipped') ||
+                !order.status.toLowerCase().includes('delivered')
+            )
+        ).length;
+
+        const lowStockProducts = products.filter(product => 
+            parseInt(product.quantityInStock || 0) < 10
+        ).length;
+
+        const totalRevenue = orders.reduce((sum, order) => {
+            
+            const value = parseFloat(order.totalAmount || order.total || order.amount || 0);
+            return sum + value;
+        }, 0);
+        const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+        const totalReturns = Math.floor(orders.length * 0.03);
+        const uniqueCustomers = new Set(orders.map(order => order.customerNumber || order.customerId)).size;
+        const conversionRate = uniqueCustomers > 0 ? (orders.length / uniqueCustomers) * 100 : 0;
+        const metrics = {
+            todayOrders,
+            pendingOrders,
+            lowStockProducts,
+            totalReturns,
+            conversionRate,
+            averageOrderValue
+        };
+
+        console.log('📊 Calculated live metrics:', metrics);
+        setLiveMetrics(metrics);
+        return metrics;
+    };
 
     const processOrderTrendData = (orders) => {
         const now = new Date();
@@ -141,21 +195,28 @@ const Dashboard = () => {
             dashboardAPI.getEntityDistribution(),
             dataAPI.getOrders(),
             dashboardAPI.getRevenueSummary(),
+            dataAPI.getProducts()
         ])
-        .then(([statsRes, chartRes, ordersRes, revenueRes]) => {
+        .then(([statsRes, chartRes, ordersRes, revenueRes, productsRes]) => {
             console.log('Dashboard: All API responses received');
             console.log('Stats Response:', statsRes.data);
             console.log('Chart Response:', chartRes.data);
             console.log('Orders Response:', ordersRes.data);
             console.log('Revenue Response:', revenueRes.data);
+            console.log('Products Response:', productsRes.data);
             
             setStats(statsRes.data);
             setChartData(chartRes.data);
+            setAllOrders(ordersRes.data);
+            setAllProducts(productsRes.data);
             
             const trendData = processOrderTrendData(ordersRes.data);
             setOrderTrendData(trendData);
             
             setRevenue(revenueRes.data);
+            
+            calculateLiveMetrics(ordersRes.data, productsRes.data);
+            
             setLoading(false);
             
             console.log('Dashboard: All data set in state');
@@ -449,7 +510,7 @@ const Dashboard = () => {
                                 <div>
                                     <p className="text-xs text-blue-600 font-medium">Avg Order Value</p>
                                     <p className="text-lg font-bold text-blue-800">
-                                        {revenue?.averageOrderValue ? `Ksh ${Math.round(revenue.averageOrderValue).toLocaleString()}` : 'Ksh 0'}
+                                        Ksh {Math.round(liveMetrics.averageOrderValue).toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="p-1.5 bg-blue-200 rounded">
@@ -463,7 +524,7 @@ const Dashboard = () => {
                                 <div>
                                     <p className="text-xs text-green-600 font-medium">Active Today</p>
                                     <p className="text-lg font-bold text-green-800">
-                                        {orderInsights.totalWeeklyOrders ? Math.max(1, Math.round(orderInsights.totalWeeklyOrders / 7)) : 0}
+                                        {liveMetrics.todayOrders}
                                     </p>
                                 </div>
                                 <div className="p-1.5 bg-green-200 rounded">
@@ -477,7 +538,7 @@ const Dashboard = () => {
                                 <div>
                                     <p className="text-xs text-purple-600 font-medium">Pending Orders</p>
                                     <p className="text-lg font-bold text-purple-800">
-                                        {stats?.orders ? Math.round(stats.orders * 0.15) : 0}
+                                        {liveMetrics.pendingOrders}
                                     </p>
                                 </div>
                                 <div className="p-1.5 bg-purple-200 rounded">
@@ -491,7 +552,7 @@ const Dashboard = () => {
                                 <div>
                                     <p className="text-xs text-orange-600 font-medium">Low Stock</p>
                                     <p className="text-lg font-bold text-orange-800">
-                                        {stats?.products ? Math.round(stats.products * 0.08) : 0}
+                                        {liveMetrics.lowStockProducts}
                                     </p>
                                 </div>
                                 <div className="p-1.5 bg-orange-200 rounded">
@@ -505,7 +566,7 @@ const Dashboard = () => {
                                 <div>
                                     <p className="text-xs text-teal-600 font-medium">Conversion</p>
                                     <p className="text-lg font-bold text-teal-800">
-                                        {stats?.customers && stats?.orders ? Math.round((stats.orders / stats.customers) * 100) : 0}%
+                                        {Math.round(liveMetrics.conversionRate)}%
                                     </p>
                                 </div>
                                 <div className="p-1.5 bg-teal-200 rounded">
@@ -521,7 +582,7 @@ const Dashboard = () => {
                                 <div>
                                     <p className="text-xs text-red-600 font-medium">Returns</p>
                                     <p className="text-lg font-bold text-red-800">
-                                        {stats?.orders ? Math.round(stats.orders * 0.03) : 0}
+                                        {liveMetrics.totalReturns}
                                     </p>
                                 </div>
                                 <div className="p-1.5 bg-red-200 rounded">
@@ -544,35 +605,50 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="space-y-3">
-                                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                                    <div className="p-1.5 bg-blue-100 rounded-full">
-                                        <FaClipboardCheck className="w-3 h-3 text-blue-600" />
+                                {/* Show recent orders from actual data */}
+                                {allOrders.slice(0, 3).map((order, index) => (
+                                    <div key={order.orderNumber || index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                        <div className="p-1.5 bg-blue-100 rounded-full">
+                                            <FaClipboardCheck className="w-3 h-3 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-800">
+                                                Order #{order.orderNumber || `ORD-${order.orderDate?.slice(-4) || 'NEW'}`}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {order.orderDate ? new Date(order.orderDate).toLocaleDateString() : 'Today'}
+                                            </p>
+                                        </div>
+                                        <span className="text-xs text-green-600 font-medium">
+                                            {order.status || 'Processing'}
+                                        </span>
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-gray-800">New order #ORD-{Math.floor(Math.random() * 1000) + 2000}</p>
-                                        <p className="text-xs text-gray-500">{Math.floor(Math.random() * 10) + 1} minutes ago</p>
+                                ))}
+                                
+                                {/* Show low stock alert if applicable */}
+                                {liveMetrics.lowStockProducts > 0 && (
+                                    <div className="flex items-center gap-3 p-2 bg-orange-50 rounded-lg border border-orange-200">
+                                        <div className="p-1.5 bg-orange-100 rounded-full">
+                                            <FaBox className="w-3 h-3 text-orange-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-medium text-gray-800">Low Stock Alert</p>
+                                            <p className="text-xs text-gray-500">{liveMetrics.lowStockProducts} products need restocking</p>
+                                        </div>
+                                        <span className="text-xs text-orange-600 font-medium">Action Required</span>
                                     </div>
-                                    <span className="text-xs text-green-600 font-medium">+Ksh {(Math.random() * 50000 + 10000).toFixed(0)}</span>
-                                </div>
+                                )}
+                                
+                                {/* System activity */}
                                 <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                                     <div className="p-1.5 bg-green-100 rounded-full">
                                         <FaUsers className="w-3 h-3 text-green-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-xs font-medium text-gray-800">New customer registered</p>
-                                        <p className="text-xs text-gray-500">{Math.floor(Math.random() * 30) + 10} minutes ago</p>
+                                        <p className="text-xs font-medium text-gray-800">Data synchronized</p>
+                                        <p className="text-xs text-gray-500">Live metrics updated</p>
                                     </div>
                                     <span className="text-xs text-blue-600 font-medium">Active</span>
-                                </div>
-                                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                                    <div className="p-1.5 bg-purple-100 rounded-full">
-                                        <FaBox className="w-3 h-3 text-purple-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-gray-800">Product inventory updated</p>
-                                        <p className="text-xs text-gray-500">{Math.floor(Math.random() * 60) + 30} minutes ago</p>
-                                    </div>
-                                    <span className="text-xs text-orange-600 font-medium">Stock Alert</span>
                                 </div>
                             </div>
                         </div>

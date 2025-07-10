@@ -13,7 +13,7 @@ const useCustomers = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [totalCustomers, setTotalCustomers] = useState(0);
-    const [itemsPerPage] = useState(10); // Fixed items per page
+    const [itemsPerPage] = useState(10);
     
     const [form, setForm] = useState({
         customerName: '',
@@ -62,16 +62,12 @@ const useCustomers = () => {
     const fetchCustomers = useCallback((page = 1) => {
         console.log('fetchCustomers called with page:', page);
         setLoading(true);
-        // For now, fetch all customers and paginate on frontend
-        // Later, this can be updated to use backend pagination
         fetch('http://localhost:8081/customers')
             .then((res) => res.json())
             .then((allData) => {
                 console.log('Fetched data:', allData.length, 'customers');
                 const totalItems = allData.length;
                 const totalPagesCount = Math.ceil(totalItems / itemsPerPage);
-                
-                // Ensure page is within valid range
                 const validPage = Math.max(1, Math.min(page, totalPagesCount || 1));
                 const startIndex = (validPage - 1) * itemsPerPage;
                 const endIndex = startIndex + itemsPerPage;
@@ -173,15 +169,13 @@ const useCustomers = () => {
                 if (!res.ok) throw new Error('Failed to delete customer');
                 showToast('Customer deleted successfully!', 'success');
                 fetchCustomers(currentPage);
-                // Clear selection if deleted customer was selected
                 setSelectedCustomers(prev => prev.filter(id => id !== customerId));
             })
             .catch((err) => {
                 showToast(err.message, 'error');
             });
     };
-
-    // Bulk selection handlers
+    
     const handleSelectCustomer = (customerId, isSelected) => {
         setSelectedCustomers(prev => {
             if (isSelected) {

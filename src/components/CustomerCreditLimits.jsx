@@ -9,7 +9,6 @@ const CustomerCreditLimits = () => {
     fetch('http://localhost:8081/customers')
       .then(res => res.json())
       .then(data => {
-        // Sort by credit limit in descending order and take top customers
         const sortedCustomers = data
           .filter(customer => customer.creditLimit && customer.creditLimit > 0)
           .sort((a, b) => b.creditLimit - a.creditLimit);

@@ -26,7 +26,6 @@ const OrderDetail = () => {
                 
                 let orderData = null;
                 
-                // First try to fetch individual order
                 try {
                     console.log('Attempting to fetch individual order...');
                     const orderRes = await fetch(`http://localhost:8081/orders/${orderId}`);
@@ -62,23 +61,15 @@ const OrderDetail = () => {
                         throw new Error(`Order with ID ${orderId} not found`);
                     }
                 }
-                
-                // Since /orderdetails doesn't exist, let's work with the order data we have
-                // and create mock order details or extract what we can from the order structure
                 console.log('Processing order data without orderdetails endpoint...');
-                
-                // Check if order contains line items or details within it
                 const mockOrderDetails = [];
                 
-                // If the order has embedded details, extract them
-                // Otherwise create a basic representation
                 if (orderData.orderDetails || orderData.items || orderData.products) {
                     console.log('Order contains embedded details');
                     const details = orderData.orderDetails || orderData.items || orderData.products;
                     mockOrderDetails.push(...details);
                 } else {
                     console.log('No embedded details found, creating basic order representation');
-                    // Create a basic order representation for display
                     mockOrderDetails.push({
                         id: { orderNumber: orderData.id, productCode: 'UNKNOWN' },
                         productCode: 'Product Information',
@@ -91,8 +82,6 @@ const OrderDetail = () => {
                 console.log('Mock order details created:', mockOrderDetails);
                 
                 console.log('Mock order details created:', mockOrderDetails);
-                
-                // Filter order details for this specific order (using mock data now)
                 const currentOrderDetails = mockOrderDetails;
 
                 // Fetch customer data
@@ -110,7 +99,6 @@ const OrderDetail = () => {
                     }
                 }
 
-                // Generate mock tracking information
                 const mockTrackingInfo = generateTrackingInfo(orderData);
 
                 setOrder(orderData);
@@ -149,7 +137,7 @@ const OrderDetail = () => {
                 completed: true
             },
             {
-                date: new Date(orderDate.getTime() + 24 * 60 * 60 * 1000), // +1 day
+                date: new Date(orderDate.getTime() + 24 * 60 * 60 * 1000),
                 status: 'Processing',
                 description: 'Order is being prepared for shipment',
                 icon: 'processing',
@@ -167,7 +155,7 @@ const OrderDetail = () => {
         ];
 
         if (shippedDate) {
-            const estimatedDelivery = new Date(shippedDate.getTime() + 3 * 24 * 60 * 60 * 1000); // +3 days
+            const estimatedDelivery = new Date(shippedDate.getTime() + 3 * 24 * 60 * 60 * 1000);
             events.push({
                 date: estimatedDelivery,
                 status: 'Delivered',

@@ -44,10 +44,8 @@ const Offices = () => {
     const [officeSearch, setOfficeSearch] = useState('');
     const [officeSearchResult, setOfficeSearchResult] = useState(null);
     const [officeNotFound, setOfficeNotFound] = useState(false);
-
-    // New state for enhanced features
-    const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'list'
-    const [sortBy, setSortBy] = useState('code'); // 'code', 'city', 'country'
+    const [viewMode, setViewMode] = useState('cards');
+    const [sortBy, setSortBy] = useState('code');
     const [filterCountry, setFilterCountry] = useState('');
     const [filterState, setFilterState] = useState('');
     const [showFilters, setShowFilters] = useState(false);
@@ -73,18 +71,12 @@ const Offices = () => {
     // Enhanced filtering and sorting logic
     const filteredOffices = offices
         .filter(office => {
-            // Text search filter
             const textMatch = officeSearch === '' || 
                 office.officeCode?.toLowerCase().includes(officeSearch.toLowerCase()) ||
                 office.city?.toLowerCase().includes(officeSearch.toLowerCase()) ||
                 office.country?.toLowerCase().includes(officeSearch.toLowerCase());
-            
-            // Country filter
             const countryMatch = !filterCountry || office.country === filterCountry;
-            
-            // State filter
             const stateMatch = !filterState || office.state === filterState;
-            
             return textMatch && countryMatch && stateMatch;
         })
         .sort((a, b) => {
@@ -103,13 +95,9 @@ const Offices = () => {
     // Get unique values for filter options
     const uniqueCountries = [...new Set(offices.map(office => office.country).filter(Boolean))];
     const uniqueStates = [...new Set(offices.map(office => office.state).filter(Boolean))];
-
-    // Calculate statistics
     const totalOffices = offices.length;
     const totalCountries = uniqueCountries.length;
     const officesWithStates = offices.filter(office => office.state).length;
-
-    // Helper function to render office card
     const renderOfficeCard = (office, idx) => {
         return (
             <div key={office.officeCode || idx} className="bg-white border-2 border-[#42befb] rounded-lg p-4 hover:shadow-lg transition-shadow">
@@ -370,7 +358,7 @@ const Offices = () => {
                 </div>
             </div>
             
-            {/* Search Section - Fixed height */}
+            {/* Search Section */}
             <div className="mb-3 flex-shrink-0">
                 <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-4">
@@ -506,7 +494,7 @@ const Offices = () => {
                 )}
             </div>
 
-            {/* Content Section - Flexible height */}
+            {/* Content Section*/}
             <div className="flex-1 min-h-0 mb-2">
                 {loading ? (
                     <div className="text-center py-4">Loading...</div>

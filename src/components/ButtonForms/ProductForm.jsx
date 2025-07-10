@@ -46,7 +46,6 @@ const ProductForm = ({ showForm, onClose, onSubmit }) => {
             const result = await response.json();
             setSuccess('Product added successfully!');
             
-            // Reset form
             setForm({
                 productName: '',
                 productLine: '',
@@ -58,12 +57,10 @@ const ProductForm = ({ showForm, onClose, onSubmit }) => {
                 msrp: ''
             });
             
-            // Call parent callback if provided
             if (onSubmit) {
                 onSubmit(result);
             }
 
-            // Auto close after success
             setTimeout(() => {
                 setSuccess('');
                 onClose();

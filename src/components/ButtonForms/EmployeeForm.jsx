@@ -18,7 +18,6 @@ const EmployeeForm = ({ showForm, onClose, onSubmit }) => {
 
     useEffect(() => {
         if (showForm) {
-            // Fetch employees for "Reports To" dropdown
             fetch('http://localhost:8081/employees')
                 .then(res => res.json())
                 .then(data => setEmployees(data))
@@ -53,7 +52,6 @@ const EmployeeForm = ({ showForm, onClose, onSubmit }) => {
             const result = await response.json();
             setSuccess('Employee added successfully!');
             
-            // Reset form
             setForm({
                 firstName: '',
                 lastName: '',
@@ -63,12 +61,10 @@ const EmployeeForm = ({ showForm, onClose, onSubmit }) => {
                 reportsTo: ''
             });
             
-            // Call parent callback if provided
             if (onSubmit) {
                 onSubmit(result);
             }
 
-            // Auto close after success
             setTimeout(() => {
                 setSuccess('');
                 onClose();

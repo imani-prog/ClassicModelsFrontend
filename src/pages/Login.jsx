@@ -1,5 +1,6 @@
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import shoppingImage from '../assets/shopping-login.jpg';
 import { useAuth } from '../contexts/AuthContext';
 import { debugLogin, testCurrentToken } from '../utils/authDebug';
@@ -12,11 +13,18 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth(); // Get login method from AuthContext
+  const { login, isAuthenticated, isInitialized } = useAuth(); // Get auth state
   
   const successMessage = location.state?.message;
+
+  // Redirect if already authenticated
+  if (isInitialized && isAuthenticated) {
+    console.log('🔄 User already authenticated, redirecting to dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -176,14 +184,27 @@ const Login = () => {
 
             <div>
               <label className="block text-sm text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-between items-center">

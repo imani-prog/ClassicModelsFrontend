@@ -9,7 +9,6 @@ const ProductCard = ({ productCode = null }) => {
     useEffect(() => {
         setLoading(true);
         setError('');
-        // Fetch the latest product or by code if provided
         const url = productCode
             ? `http://localhost:8081/products/${encodeURIComponent(productCode)}`
             : 'http://localhost:8081/products';

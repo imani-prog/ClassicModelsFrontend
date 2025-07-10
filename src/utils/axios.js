@@ -53,11 +53,11 @@ api.interceptors.response.use(
       message: error.message,
     });
     
-    // Handle 401 Unauthorized - redirect to login
+    // Handle 401 Unauthorized - don't auto-redirect, let AuthContext handle it
     if (response?.status === 401) {
-      console.warn('🔒 Unauthorized access - redirecting to login');
-      TokenManager.clearToken();
-      window.location.href = '/login';
+      console.warn('🔒 Unauthorized access - token may be expired');
+      // Don't automatically clear token or redirect here
+      // Let the AuthContext validateToken method handle this
       return Promise.reject(new Error('Session expired. Please login again.'));
     }
     

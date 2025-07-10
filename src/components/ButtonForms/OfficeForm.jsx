@@ -40,7 +40,6 @@ const OfficeForm = ({ showForm, onClose, onSubmit }) => {
             const result = await response.json();
             setSuccess('Office added successfully!');
             
-            // Reset form
             setForm({
                 officeCode: '',
                 addressLine1: '',
@@ -53,12 +52,10 @@ const OfficeForm = ({ showForm, onClose, onSubmit }) => {
                 territory: ''
             });
             
-            // Call parent callback if provided
             if (onSubmit) {
                 onSubmit(result);
             }
 
-            // Auto close after success
             setTimeout(() => {
                 setSuccess('');
                 onClose();

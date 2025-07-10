@@ -32,15 +32,13 @@ const Orders = () => {
     const [addLoading, setAddLoading] = useState(false);
     const [addError, setAddError] = useState('');
     const [addSuccess, setAddSuccess] = useState('');
-    const [_searchId, setSearchId] = useState(''); // Used in modal for ID tracking
+    const [_searchId, setSearchId] = useState('');
     const [searchResult, setSearchResult] = useState(null);
-    const [_searchError, setSearchError] = useState(''); // Used in inline handlers
+    const [_searchError, setSearchError] = useState('');
     const [editLoading, setEditLoading] = useState(false);
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-
-    // New state for enhanced features
-    const [sortBy, setSortBy] = useState('orderDate'); // 'orderDate', 'status', 'customer'
+    const [sortBy, setSortBy] = useState('orderDate');
     const [filterStatus, setFilterStatus] = useState('');
     const [filterDateFrom, setFilterDateFrom] = useState('');
     const [filterDateTo, setFilterDateTo] = useState('');
@@ -89,30 +87,22 @@ const Orders = () => {
         
         if (customerId) {
             setAddForm(prev => ({ ...prev, customerNumber: customerId }));
-            setShowAdd(true); // Automatically open the add order modal
+            setShowAdd(true);
         }
         
         if (editOrderId) {
-            // Trigger edit mode for the specified order
             handleEditOrder(editOrderId);
         }
     }, [location.search]);
-
-    // Enhanced filtering and sorting logic
     const filteredOrders = orders
         .filter(order => {
-            // Global search filter
             const searchMatch = !globalSearch || 
                 String(order.id).toLowerCase().includes(globalSearch.toLowerCase()) ||
                 String(order.customerNumber).toLowerCase().includes(globalSearch.toLowerCase()) ||
                 order.status?.toLowerCase().includes(globalSearch.toLowerCase()) ||
                 formatDisplayDate(order.orderDate).toLowerCase().includes(globalSearch.toLowerCase()) ||
                 order.comments?.toLowerCase().includes(globalSearch.toLowerCase());
-            
-            // Status filter
             const statusMatch = !filterStatus || order.status === filterStatus;
-            
-            // Date range filter
             let dateMatch = true;
             if (filterDateFrom || filterDateTo) {
                 const orderDate = new Date(order.orderDate);
@@ -131,7 +121,7 @@ const Orders = () => {
         .sort((a, b) => {
             switch (sortBy) {
                 case 'orderDate':
-                    return new Date(b.orderDate) - new Date(a.orderDate); // Most recent first
+                    return new Date(b.orderDate) - new Date(a.orderDate);
                 case 'status':
                     return (a.status || '').localeCompare(b.status || '');
                 case 'customer':
@@ -148,7 +138,6 @@ const Orders = () => {
         return acc;
     }, {});
 
-    // Add order handler
     const handleAddInput = (e) => {
         const { name, value } = e.target;
         setAddForm(prev => ({ ...prev, [name]: value }));
@@ -201,7 +190,7 @@ const Orders = () => {
         e.preventDefault();
         setEditLoading(true);
         setSearchError('');
-        // Prepare payload: map id to orderNumber, format dates, only send expected fields
+
         const {
             id, 
             customerNumber,
@@ -214,15 +203,13 @@ const Orders = () => {
         // Helper to format date as YYYY-MM-DD
         const formatDate = (d) => {
             if (!d) return '';
-            // If already in YYYY-MM-DD, return as is
             if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
-            // Try to parse and format
             const dateObj = new Date(d);
             if (isNaN(dateObj)) return d;
             return dateObj.toISOString().slice(0, 10);
         };
         const payload = {
-            orderNumber: id, // Backend may expect 'orderNumber' instead of 'id'
+            orderNumber: id,
             customerNumber,
             orderDate: formatDate(orderDate),
             requiredDate: formatDate(requiredDate),
@@ -254,7 +241,6 @@ const Orders = () => {
             .finally(() => setEditLoading(false));
     };
 
-    // Handle opening order for editing
     const handleEditOrder = async (orderId) => {
         try {
             const response = await fetch(`http://localhost:8081/orders/${orderId}`);
@@ -434,7 +420,7 @@ const Orders = () => {
                 )}
             </div>
 
-            {/* Content Section - Flexible height */}
+            {/* Content Section*/}
             <div className="flex-1 min-h-0 mb-2">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">

@@ -18,7 +18,6 @@ function Modal({ open, onClose, children }) {
 const formatDate = (d) => {
     if (!d) return '';
     
-    // Helper function to format dates as DD/MM/YYYY
     const formatDisplayDate = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -29,19 +28,16 @@ const formatDate = (d) => {
         return `${day}/${month}/${year}`;
     };
 
-    // If already in YYYY-MM-DD format, convert to DD/MM/YYYY
     if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
         return formatDisplayDate(d);
     }
 
-    // If it's an 8-digit number (YYYYMMDD), convert to DD/MM/YYYY
     if (/^\d{8}$/.test(String(d))) {
         const s = String(d);
         const isoDate = `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
         return formatDisplayDate(isoDate);
     }
     
-    // Try to parse as date and format as DD/MM/YYYY
     const dateObj = new Date(d);
     if (!isNaN(dateObj)) return formatDisplayDate(dateObj);
     return d;
@@ -62,10 +58,8 @@ const Payments = () => {
     const [addLoading, setAddLoading] = useState(false);
     const [addError, setAddError] = useState('');
     const [addSuccess, setAddSuccess] = useState('');
-
-    // New state for enhanced features
-    const [viewMode, setViewMode] = useState('table'); // 'cards' or 'table'
-    const [sortBy, setSortBy] = useState('customerId'); // 'customerId', 'amount', 'date'
+    const [viewMode, setViewMode] = useState('table');
+    const [sortBy, setSortBy] = useState('customerId');
     const [filterAmountMin, setFilterAmountMin] = useState('');
     const [filterAmountMax, setFilterAmountMax] = useState('');
     const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -96,18 +90,14 @@ const Payments = () => {
     // Enhanced filtering and sorting logic
     const filteredPayments = payments
         .filter(payment => {
-            // Global search filter
             const searchMatch = !globalSearch || 
                 String(payment.customerId).toLowerCase().includes(globalSearch.toLowerCase()) ||
                 String(payment.checkNo).toLowerCase().includes(globalSearch.toLowerCase()) ||
                 String(payment.amount).includes(globalSearch) ||
                 formatDate(payment.date).toLowerCase().includes(globalSearch.toLowerCase());
             
-            // Amount range filter
             const amountMatch = (!filterAmountMin || parseFloat(payment.amount) >= parseFloat(filterAmountMin)) &&
                                (!filterAmountMax || parseFloat(payment.amount) <= parseFloat(filterAmountMax));
-            
-            // Date range filter
             let dateMatch = true;
             if (filterDateFrom || filterDateTo) {
                 const paymentDate = new Date(payment.date);
@@ -128,9 +118,9 @@ const Payments = () => {
                 case 'customerId':
                     return String(a.customerId).localeCompare(String(b.customerId));
                 case 'amount':
-                    return parseFloat(b.amount) - parseFloat(a.amount); // High to low
+                    return parseFloat(b.amount) - parseFloat(a.amount);
                 case 'date':
-                    return new Date(b.date) - new Date(a.date); // Most recent first
+                    return new Date(b.date) - new Date(a.date);
                 default:
                     return 0;
             }
@@ -448,7 +438,7 @@ const Payments = () => {
                 )}
             </div>
 
-            {/* Content Section - Flexible height */}
+            {/* Content Section*/}
             <div className="flex-1 min-h-0 mb-2">
                 {filteredPayments.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -538,25 +528,21 @@ const Payments = () => {
                     setAddError('');
                     setAddSuccess('');
                     
-                    // Pre-validation checks
                     console.log('Starting payment creation...');
-                    
-                    // Check if customer exists
                     try {
                         const customerCheck = await fetch(`http://localhost:8081/customers/${addForm.customerId}`);
                         console.log('Customer check status:', customerCheck.status);
                         if (!customerCheck.ok) {
                             throw new Error(`Customer ${addForm.customerId} does not exist`);
                         }
-                        console.log('✅ Customer exists');
+                        console.log('Customer exists');
                     } catch (customerError) {
-                        console.error('❌ Customer validation failed:', customerError);
+                        console.error('Customer validation failed:', customerError);
                         setAddError(`Customer validation failed: ${customerError.message}`);
                         setAddLoading(false);
                         return;
                     }
                     
-                    // Check for duplicate check number
                     const duplicatePayment = payments.find(p => 
                         p.customerId === addForm.customerId && p.checkNo === addForm.checkNo
                     );
@@ -565,7 +551,7 @@ const Payments = () => {
                         setAddLoading(false);
                         return;
                     }
-                    console.log('✅ No duplicate check number found');
+                    console.log('No duplicate check number found');
                     
                     try {
                         const payload = {
@@ -578,42 +564,34 @@ const Payments = () => {
                         };
                         
                         console.log('Sending payment payload:', payload);
-                        
-                        // Let's also check what we're sending exactly
                         console.log('Customer ID type:', typeof addForm.customerId, 'Value:', addForm.customerId);
                         console.log('Check Number type:', typeof addForm.checkNo, 'Value:', addForm.checkNo);
                         console.log('Amount type:', typeof parseFloat(addForm.amount), 'Value:', parseFloat(addForm.amount));
                         console.log('Date type:', typeof addForm.date, 'Value:', addForm.date);
                         
-                        // Try a different date format - some backends expect timestamp
                         const paymentDateFormatted = new Date(addForm.date).toISOString().split('T')[0];
                         console.log('Formatted date:', paymentDateFormatted);
                         
                         const alternativePayload = {
                             id: {
-                                customerNumber: parseInt(addForm.customerId), // Try as number
+                                customerNumber: parseInt(addForm.customerId),
                                 checkNumber: addForm.checkNo
                             },
                             amount: parseFloat(addForm.amount),
-                            paymentDate: paymentDateFormatted // Use formatted date
+                            paymentDate: paymentDateFormatted
                         };
                         
                         console.log('Alternative payload:', alternativePayload);
                         
-                        // Let's try different payload structures to see what the backend expects
                         const payloadVariations = [
-                            // Current structure
                             alternativePayload,
-                            
-                            // Flat structure
                             {
                                 customerNumber: parseInt(addForm.customerId),
                                 checkNumber: addForm.checkNo,
                                 amount: parseFloat(addForm.amount),
                                 paymentDate: paymentDateFormatted
                             },
-                            
-                            // Different key structure
+                
                             {
                                 id: {
                                     customerNumber: parseInt(addForm.customerId),
@@ -642,7 +620,7 @@ const Payments = () => {
                                 console.log(`Attempt ${i + 1} response status:`, response.status);
                                 
                                 if (response.ok) {
-                                    console.log(`✅ Success with payload structure ${i + 1}!`);
+                                    console.log(`Success with payload structure ${i + 1}!`);
                                     const added = await response.json();
                                     setPayments(payments => [
                                         {
@@ -659,7 +637,7 @@ const Payments = () => {
                                         setAddModalOpen(false);
                                     }, 1500);
                                     paymentSuccess = true;
-                                    break; // Exit loop on success
+                                    break;
                                 } else {
                                     const errorText = await response.text();
                                     console.error(`Attempt ${i + 1} failed:`, response.status, errorText);
@@ -669,7 +647,6 @@ const Payments = () => {
                             }
                         }
                         
-                        // If all attempts failed
                         if (!paymentSuccess) {
                             setAddError('All payload variations failed. Check backend API documentation.');
                         }

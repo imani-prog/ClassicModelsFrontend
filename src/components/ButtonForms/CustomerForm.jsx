@@ -49,7 +49,6 @@ const CustomerForm = ({ showForm, onClose, onSubmit }) => {
             const result = await response.json();
             setSuccess('Customer added successfully!');
             
-            // Reset form
             setForm({
                 customerName: '',
                 contactFirstName: '',
@@ -65,12 +64,10 @@ const CustomerForm = ({ showForm, onClose, onSubmit }) => {
                 creditLimit: ''
             });
             
-            // Call parent callback if provided
             if (onSubmit) {
                 onSubmit(result);
             }
 
-            // Auto close after success
             setTimeout(() => {
                 setSuccess('');
                 onClose();

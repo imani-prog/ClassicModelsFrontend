@@ -2,14 +2,12 @@ import { FaFilter, FaPlus, FaSortAmountDown, FaTrash } from 'react-icons/fa';
 import { IoSearch } from 'react-icons/io5';
 
 const EnhancedProductSearch = ({ 
-    // Search and form props
     searchError,
     searchSuccess,
     onOpenAddForm,
     selectedProducts = [],
     onBulkDelete,
     
-    // Enhanced filter props
     globalSearch,
     onGlobalSearchChange,
     sortBy,
@@ -27,7 +25,7 @@ const EnhancedProductSearch = ({
 }) => {
     return (
         <div className="space-y-4">
-            {/* Single Search Bar with Controls */}
+            {/*Search Bar with Controls */}
             <div className="flex items-center gap-4 flex-wrap">
                 {/* Main Search Bar */}
                 <div className="relative flex-1 min-w-80">
