@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -55,62 +55,26 @@ const RevenueAnalyticsChart = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [ordersResponse, revenueResponse] = await Promise.all([
-          fetch('http://localhost:8081/api/orders'),
-          fetch('http://localhost:8081/api/dashboard/revenue-summary')
-        ]);
         
-        const orders = await ordersResponse.json();
-        const revenueData = await revenueResponse.json();
-        
-        if (!orders || orders.length === 0) {
-          setLoading(false);
-          return;
-        }
-
-        // Process revenue data by day for the last 7 days
-        const now = new Date();
-        const last7Days = [];
-        
-        for (let i = 6; i >= 0; i--) {
-          const date = new Date(now);
-          date.setDate(now.getDate() - i);
-          const dateStr = date.toISOString().split('T')[0];
-          
-          last7Days.push({
-            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            fullDate: dateStr,
-            revenue: 0,
-            orders: 0,
-            avgOrderValue: 0
-          });
-        }
-
-        // Calculate daily revenue from orders
-        orders.forEach((order) => {
-          const orderDate = new Date(order.orderDate).toISOString().split('T')[0];
-          const dayData = last7Days.find(day => day.fullDate === orderDate);
-          
-          if (dayData) {
-            const orderValue = parseFloat(order.totalAmount || order.total || order.amount || 0);
-            dayData.revenue += orderValue;
-            dayData.orders += 1;
-          }
-        });
-
-        // Calculate average order value for each day
-        last7Days.forEach(day => {
-          day.avgOrderValue = day.orders > 0 ? day.revenue / day.orders : 0;
-        });
+        // Hardcoded revenue data for demonstration
+        const hardcodedData = [
+          { date: 'Jul 5', revenue: 2400, orders: 12, avgOrderValue: 200 },
+          { date: 'Jul 6', revenue: 3200, orders: 15, avgOrderValue: 213 },
+          { date: 'Jul 7', revenue: 1800, orders: 8, avgOrderValue: 225 },
+          { date: 'Jul 8', revenue: 4100, orders: 18, avgOrderValue: 228 },
+          { date: 'Jul 9', revenue: 3500, orders: 16, avgOrderValue: 219 },
+          { date: 'Jul 10', revenue: 2900, orders: 13, avgOrderValue: 223 },
+          { date: 'Jul 11', revenue: 3800, orders: 17, avgOrderValue: 224 }
+        ];
 
         // Calculate summary statistics
-        const totalRevenue = last7Days.reduce((sum, day) => sum + day.revenue, 0);
-        const totalOrders = last7Days.reduce((sum, day) => sum + day.orders, 0);
+        const totalRevenue = hardcodedData.reduce((sum, day) => sum + day.revenue, 0);
+        const totalOrders = hardcodedData.reduce((sum, day) => sum + day.orders, 0);
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
         // Calculate trends (compare first half vs second half of week)
-        const firstHalf = last7Days.slice(0, 3);
-        const secondHalf = last7Days.slice(-3);
+        const firstHalf = hardcodedData.slice(0, 3);
+        const secondHalf = hardcodedData.slice(-3);
         
         const firstHalfRevenue = firstHalf.reduce((sum, day) => sum + day.revenue, 0);
         const secondHalfRevenue = secondHalf.reduce((sum, day) => sum + day.revenue, 0);
@@ -122,8 +86,8 @@ const RevenueAnalyticsChart = () => {
         const avgTrend = firstHalfAvg > 0 ? 
           Math.round(((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100) : 0;
 
-        // Monthly growth from API or calculate as placeholder
-        const monthlyGrowth = revenueData?.trend || Math.round(Math.random() * 20 - 5); // -5% to +15%
+        // Monthly growth simulation
+        const monthlyGrowth = 12; // Hardcoded positive growth
 
         setSummaryStats({
           totalRevenue: { 
@@ -140,9 +104,9 @@ const RevenueAnalyticsChart = () => {
           }
         });
 
-        setTrendData(last7Days);
+        setTrendData(hardcodedData);
       } catch (err) {
-        console.error('Error fetching revenue data:', err);
+        console.error('Error loading revenue data:', err);
       } finally {
         setLoading(false);
       }
@@ -243,175 +207,106 @@ const RevenueAnalyticsChart = () => {
       </div>
 
       {/* Enhanced Chart Container */}
-      <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-xl p-6 border border-slate-200 shadow-inner">
-        <div className="bg-white rounded-lg p-4 shadow-sm border border-slate-100">
+      <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-xl p-4 border border-slate-200 shadow-inner">
+        <div className="bg-white rounded-lg p-3 shadow-sm border border-slate-100">
           {loading ? (
-            <div className="flex items-center justify-center h-80">
+            <div className="flex items-center justify-center h-48">
               <div className="relative">
-                <div className="animate-spin rounded-full h-10 w-10 border-4 border-green-200 border-t-green-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-4 border-green-200 border-t-green-500"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-green-300 animate-ping"></div>
               </div>
-              <span className="ml-4 text-slate-600 font-medium">Loading revenue data...</span>
+              <span className="ml-3 text-gray-600 font-medium">Loading revenue data...</span>
             </div>
           ) : (
-            <div style={{ width: '100%', height: 340 }}>
+            <div style={{ width: '100%', height: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart 
+                <BarChart 
                   data={trendData}
-                  margin={{ top: 25, right: 35, left: 25, bottom: 25 }}
+                  margin={{ top: 15, right: 15, left: 15, bottom: 15 }}
+                  barCategoryGap="20%"
                 >
-                {/*defs, grid, axes, tooltip, legend, and lines... */}
                 <defs>
-                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10B981" stopOpacity={0.3}/>
-                    <stop offset="50%" stopColor="#10B981" stopOpacity={0.1}/>
-                    <stop offset="100%" stopColor="#10B981" stopOpacity={0}/>
+                  <linearGradient id="revenueBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.8}/>
                   </linearGradient>
-                  <linearGradient id="avgOrderGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                    <stop offset="50%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0}/>
+                  <linearGradient id="ordersBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#60A5FA" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0.8}/>
                   </linearGradient>
                 </defs>
                 
                 <CartesianGrid 
-                  strokeDasharray="2 6" 
+                  strokeDasharray="2 4" 
                   stroke="#E5E7EB" 
-                  strokeOpacity={0.6}
+                  strokeOpacity={0.4}
                   horizontal={true}
                   vertical={false}
                 />
                 
                 <XAxis 
                   dataKey="date" 
-                  axisLine={{
-                    stroke: '#374151',
-                    strokeWidth: 2
-                  }}
-                  tickLine={{
-                    stroke: '#374151',
-                    strokeWidth: 1.5,
-                    length: 6
-                  }}
-                  tick={{ 
-                    fontSize: 12, 
-                    fill: '#374151', 
-                    fontWeight: '600',
-                    dy: 4
-                  }}
+                  axisLine={{ stroke: '#374151', strokeWidth: 1 }}
+                  tickLine={{ stroke: '#374151', strokeWidth: 1, length: 4 }}
+                  tick={{ fontSize: 10, fill: '#374151', fontWeight: '600' }}
                   interval={0}
-                  angle={0}
-                  textAnchor="middle"
-                  height={50}
-                  tickMargin={8}
-                  label={{ 
-                    value: 'Date', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    style: { textAnchor: 'middle', fill: '#374151', fontSize: '12px', fontWeight: '600' }
-                  }}
+                  height={25}
                 />
                 
                 <YAxis 
                   allowDecimals={false}
-                  axisLine={{
-                    stroke: '#374151',
-                    strokeWidth: 2
-                  }}
-                  tickLine={{
-                    stroke: '#374151',
-                    strokeWidth: 1.5,
-                    length: 6
-                  }}
-                  tick={{ 
-                    fontSize: 12, 
-                    fill: '#374151', 
-                    fontWeight: '600'
-                  }}
-                  domain={[0, (dataMax) => {
-                    const max = Math.max(dataMax + 100, 500);
-                    return Math.ceil(max / 100) * 100;
-                  }]}
-                  tickCount={8}
-                  width={50}
-                  tickMargin={8}
-                  label={{ 
-                    value: 'Revenue ($)', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#374151', fontSize: '12px', fontWeight: '600' }
-                  }}
+                  axisLine={{ stroke: '#374151', strokeWidth: 1 }}
+                  tickLine={{ stroke: '#374151', strokeWidth: 1, length: 4 }}
+                  tick={{ fontSize: 10, fill: '#374151', fontWeight: '600' }}
+                  domain={[0, 'dataMax + 500']}
+                  tickCount={4}
+                  width={40}
                 />
                 
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  formatter={(value, name) => [
+                    name === 'revenue' ? `$${value.toLocaleString()}` : value,
+                    name === 'revenue' ? 'Revenue' : 'Orders'
+                  ]}
+                />
                 
                 <Legend 
                   verticalAlign="top" 
                   align="right"
-                  iconType="circle"
+                  iconType="rect"
                   wrapperStyle={{
-                    paddingBottom: '20px',
-                    fontSize: '13px',
+                    paddingBottom: '10px',
+                    fontSize: '11px',
                     fontWeight: '600',
                     color: '#374151'
                   }}
                   iconSize={8}
                 />
                 
-                <Line
-                  type="natural"
+                <Bar
                   dataKey="revenue"
-                  stroke="#10B981"
-                  name="Daily Revenue"
-                  strokeWidth={3.5}
-                  dot={{ 
-                    r: 4, 
-                    fill: '#10B981',
-                    strokeWidth: 2,
-                    stroke: '#ffffff',
-                    filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))'
-                  }}
-                  activeDot={{ 
-                    r: 8, 
-                    fill: '#10B981',
-                    strokeWidth: 3,
-                    stroke: '#ffffff',
-                    filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.4))'
-                  }}
-                  connectNulls={false}
-                  isAnimationActive={true}
-                  animationBegin={0}
-                  animationDuration={1500}
-                  animationEasing="ease-in-out"
+                  fill="url(#revenueBar)"
+                  name="Revenue ($)"
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={25}
                 />
                 
-                <Line
-                  type="natural"
-                  dataKey="avgOrderValue"
-                  stroke="#3B82F6"
-                  name="Avg Order Value"
-                  strokeWidth={3.5}
-                  dot={{ 
-                    r: 4, 
-                    fill: '#3B82F6',
-                    strokeWidth: 2,
-                    stroke: '#ffffff',
-                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))'
-                  }}
-                  activeDot={{ 
-                    r: 8, 
-                    fill: '#3B82F6',
-                    strokeWidth: 3,
-                    stroke: '#ffffff',
-                    filter: 'drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4))'
-                  }}
-                  connectNulls={false}
-                  isAnimationActive={true}
-                  animationBegin={300}
-                  animationDuration={1500}
-                  animationEasing="ease-in-out"
+                <Bar
+                  dataKey="orders"
+                  fill="url(#ordersBar)"
+                  name="Orders"
+                  radius={[2, 2, 0, 0]}
+                  maxBarSize={25}
                 />
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         )}
@@ -442,10 +337,10 @@ const RevenueAnalyticsChart = () => {
           </div>
         </div>
 
-        {/* Performance Alerts */}
+        {/* Performance Insights */}
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
             <h4 className="font-semibold text-blue-900 text-sm">Performance Insights</h4>
           </div>
           <div className="space-y-2">
