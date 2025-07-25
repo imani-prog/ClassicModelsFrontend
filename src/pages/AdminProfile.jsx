@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import {
-    FaArrowLeft,
-    FaBell,
-    FaChartLine,
-    FaClock,
-    FaCog,
-    FaDownload,
-    FaEdit,
-    FaKey,
-    FaSave,
-    FaShieldAlt,
-    FaUser,
-    FaUserShield
+  FaArrowLeft,
+  FaBell,
+  FaCalendarAlt,
+  FaChartLine,
+  FaClock,
+  FaCog,
+  FaDownload,
+  FaEdit,
+  FaKey,
+  FaSave,
+  FaShieldAlt,
+  FaUser,
+  FaUserShield
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -336,43 +337,63 @@ const AdminProfile = () => {
                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       !isEditing ? 'bg-gray-50' : 'bg-white'
                     }`}
-                    placeholder="Tell us about yourself..."
+                    placeholder="More about yourself..."
                   />
                 </div>
-              </div>
 
-              {/* Account Statistics */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-                <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-                  <FaChartLine className="w-6 h-6 mr-3 text-blue-600" />
-                  Account Statistics
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="text-center bg-blue-50 rounded-lg p-6">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">{adminStats.totalLogins || 0}</div>
-                    <div className="text-sm text-gray-600">Total Logins</div>
-                  </div>
-                  <div className="text-center bg-green-50 rounded-lg p-6">
-                    <div className="text-3xl font-bold text-green-600 mb-2">
-                      {formatDateShort(adminStats.lastLogin)}
+                {/* Account Statistics */}
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <FaChartLine className="w-5 h-5 mr-3 text-blue-600" />
+                    Account Statistics
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">#{adminStats.totalLogins || 0}</span>
+                        </div>
+                        <div className="text-xl font-bold text-blue-700">{adminStats.totalLogins || 0}</div>
+                      </div>
+                      <div className="text-sm font-medium text-blue-600">Total Logins</div>
                     </div>
-                    <div className="text-sm text-gray-600">Last Login</div>
-                  </div>
-                  <div className="text-center bg-purple-50 rounded-lg p-6">
-                    <div className="text-3xl font-bold text-purple-600 mb-2">
-                      {adminStats.systemAccess.length}
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                          <FaClock className="w-3 h-3 text-white" />
+                        </div>
+                        <div className="text-lg font-bold text-blue-700">
+                          {formatDateShort(adminStats.lastLogin)}
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-blue-600">Last Login</div>
                     </div>
-                    <div className="text-sm text-gray-600">System Access</div>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                          <FaUserShield className="w-3 h-3 text-white" />
+                        </div>
+                        <div className="text-xl font-bold text-blue-700">
+                          {adminStats.systemAccess.length}
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-blue-600">System Access</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                          <FaCalendarAlt className="w-3 h-3 text-white" />
+                        </div>
+                        <div className="text-xl font-bold text-blue-700">{calculateDaysActive(adminStats.accountCreated)}</div>
+                      </div>
+                      <div className="text-sm font-medium text-blue-600">Days Active</div>
+                    </div>
                   </div>
-                  <div className="text-center bg-orange-50 rounded-lg p-6">
-                    <div className="text-3xl font-bold text-orange-600 mb-2">{calculateDaysActive(adminStats.accountCreated)}</div>
-                    <div className="text-sm text-gray-600">Days Active</div>
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-500">
+                      Account created: {formatDate(adminStats.accountCreated)}
+                    </p>
                   </div>
-                </div>
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
-                    Account created: {formatDate(adminStats.accountCreated)}
-                  </p>
                 </div>
               </div>
             </div>

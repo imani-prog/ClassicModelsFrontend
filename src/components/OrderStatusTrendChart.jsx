@@ -207,8 +207,8 @@ const RevenueAnalyticsChart = () => {
       </div>
 
       {/* Enhanced Chart Container */}
-      <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-xl p-4 border border-slate-200 shadow-inner">
-        <div className="bg-white rounded-lg p-3 shadow-sm border border-slate-100">
+      <div className="bg-gradient-to-br from-slate-50 via-white to-slate-50 rounded-xl p-2 border border-slate-200 shadow-inner">
+        <div className="bg-white rounded-lg p-2 shadow-sm border border-slate-100">
           {loading ? (
             <div className="flex items-center justify-center h-48">
               <div className="relative">
@@ -218,12 +218,12 @@ const RevenueAnalyticsChart = () => {
               <span className="ml-3 text-gray-600 font-medium">Loading revenue data...</span>
             </div>
           ) : (
-            <div style={{ width: '100%', height: 200 }}>
+            <div style={{ width: '100%', height: 360 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart 
                   data={trendData}
-                  margin={{ top: 15, right: 15, left: 15, bottom: 15 }}
-                  barCategoryGap="20%"
+                  margin={{ top: 30, right: 30, left: 30, bottom: 50 }}
+                  barCategoryGap="10%"
                 >
                 <defs>
                   <linearGradient id="revenueBar" x1="0" y1="0" x2="0" y2="1">
@@ -247,20 +247,20 @@ const RevenueAnalyticsChart = () => {
                 <XAxis 
                   dataKey="date" 
                   axisLine={{ stroke: '#374151', strokeWidth: 1 }}
-                  tickLine={{ stroke: '#374151', strokeWidth: 1, length: 4 }}
-                  tick={{ fontSize: 10, fill: '#374151', fontWeight: '600' }}
+                  tickLine={{ stroke: '#374151', strokeWidth: 1, length: 6 }}
+                  tick={{ fontSize: 13, fill: '#374151', fontWeight: '600' }}
                   interval={0}
-                  height={25}
+                  height={55}
                 />
                 
                 <YAxis 
                   allowDecimals={false}
                   axisLine={{ stroke: '#374151', strokeWidth: 1 }}
-                  tickLine={{ stroke: '#374151', strokeWidth: 1, length: 4 }}
-                  tick={{ fontSize: 10, fill: '#374151', fontWeight: '600' }}
-                  domain={[0, 'dataMax + 500']}
-                  tickCount={4}
-                  width={40}
+                  tickLine={{ stroke: '#374151', strokeWidth: 1, length: 6 }}
+                  tick={{ fontSize: 13, fill: '#374151', fontWeight: '600' }}
+                  domain={[0, 'dataMax + 50']}
+                  tickCount={8}
+                  width={70}
                 />
                 
                 <Tooltip 
@@ -268,7 +268,7 @@ const RevenueAnalyticsChart = () => {
                     backgroundColor: '#fff',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    fontSize: '11px',
+                    fontSize: '12px',
                     fontWeight: '500',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
@@ -283,28 +283,28 @@ const RevenueAnalyticsChart = () => {
                   align="right"
                   iconType="rect"
                   wrapperStyle={{
-                    paddingBottom: '10px',
-                    fontSize: '11px',
+                    paddingBottom: '25px',
+                    fontSize: '12px',
                     fontWeight: '600',
                     color: '#374151'
                   }}
-                  iconSize={8}
+                  iconSize={14}
                 />
                 
                 <Bar
                   dataKey="revenue"
                   fill="url(#revenueBar)"
                   name="Revenue ($)"
-                  radius={[2, 2, 0, 0]}
-                  maxBarSize={25}
+                  radius={[5, 5, 0, 0]}
+                  maxBarSize={55}
                 />
                 
                 <Bar
                   dataKey="orders"
                   fill="url(#ordersBar)"
                   name="Orders"
-                  radius={[2, 2, 0, 0]}
-                  maxBarSize={25}
+                  radius={[5, 5, 0, 0]}
+                  maxBarSize={55}
                 />
               </BarChart>
             </ResponsiveContainer>
