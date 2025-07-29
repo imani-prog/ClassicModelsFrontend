@@ -59,7 +59,7 @@ const BusinessAnalytics = () => {
             
                 const limit = parseFloat(customer.creditLimit) || 0;
                 if (limit <= 50000) creditLimitRanges['Low (0-50K)']++;
-                else if (limit <= 100000) creditLimitRanges['Medium (50K-100K)']++;
+                else if (limit <= 100000) creditLimitRanges['MedclassName="bg-gray-50 rounded-lg p-4"ium (50K-100K)']++;
                 else if (limit <= 200000) creditLimitRanges['High (100K-200K)']++;
                 else creditLimitRanges['Premium (200K+)']++;
 
